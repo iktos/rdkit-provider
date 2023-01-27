@@ -13,11 +13,17 @@ export const RDKitProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [RDKit, setRDKit] = useState<RDKitModule | null>(null);
 
   useEffect(() => {
+    let isProviderMounted = true;
     if (globalThis.initRDKitModule) {
       globalThis.initRDKitModule().then((loadedRDKit) => {
-        setRDKit(loadedRDKit);
+        if (isProviderMounted) {
+          setRDKit(loadedRDKit);
+        }
       });
     }
+    return () => {
+      isProviderMounted = false;
+    };
   }, []);
 
   return <RDKitContext.Provider value={{ RDKit }}>{children}</RDKitContext.Provider>;
