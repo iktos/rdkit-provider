@@ -5,4 +5,5 @@ export {};
 
 declare global {
   var initRDKitModule: (() => Promise<RDKitModule>) | null;
+  var RDKit: RDKitModule | null;
 }
