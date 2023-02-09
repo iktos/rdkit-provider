@@ -1,5 +1,6 @@
 import { RDKitModule } from '@rdkit/rdkit';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { cleanAllCache } from '../utils/caching';
 
 export interface RDKitContextValue {
   RDKit: RDKitModule | null;
@@ -27,6 +28,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
     }
     return () => {
       isProviderMounted = false;
+      cleanAllCache();
     };
   }, [initialRdkitInstance]);
 
