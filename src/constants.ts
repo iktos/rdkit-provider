@@ -1,1 +1,1 @@
-export const MAX_CACHED_JSMOLS = 500;
+export const MAX_CACHED_JSMOLS = 150;

@@ -1,15 +1,30 @@
 import { RDKitModule } from '@rdkit/rdkit';
+import { cleanJSMolCache, getJSMolFromCache, storeJSMolInCache } from './caching';
 
-export const get_molecule = (smiles: string, RDKit: RDKitModule | null) => {
+const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
+  const cachedMolecule = getJSMolFromCache(smiles);
+  if (cachedMolecule) return cachedMolecule;
+  if (!smiles) return null;
   if (!RDKit) return null;
-  // we need to manually call delete on the created molecule instance once done using it,
-  // to avoid memory leakage 1576-resolve-oom-error-when-redkit-is-spammed-in-a-short-amount-of-time
+
   const tempMolecule = RDKit.get_mol(smiles);
-  // get_new_coords(true) -> better macrocyles drawing.
   const mdlWithCoords = tempMolecule.get_new_coords(true);
   tempMolecule.delete();
 
-  return RDKit.get_mol(mdlWithCoords);
+  const mol = RDKit.get_mol(mdlWithCoords);
+  storeJSMolInCache(smiles, mol);
+  return mol;
+};
+
+export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
+  try {
+    return get_molecule_memory_unsafe(smiles, RDKit);
+  } catch (e) {
+    // clean cache on possible Runtimeerror OOM
+    console.error(e);
+    cleanJSMolCache();
+    return get_molecule_memory_unsafe(smiles, RDKit);
+  }
 };
 
 export const get_molecule_details = ({ smiles }: GetMoleculeDetailsParams, RDKit: RDKitModule | null) => {

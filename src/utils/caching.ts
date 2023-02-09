@@ -8,7 +8,13 @@ export const storeJSMolInCache = (smiles: string, mol: JSMol) => {
     globalThis.jsMolCache = { [smiles]: mol };
     return;
   }
-  globalThis.jsMolCache[smiles] = mol;
+  try {
+    globalThis.jsMolCache[smiles] = mol;
+  } catch (e) {
+    console.error(e);
+    cleanJSMolCache();
+    globalThis.jsMolCache = { [smiles]: mol };
+  }
 };
 
 export const getJSMolFromCache = (smiles: string) => {
@@ -20,12 +26,10 @@ export const getJSMolFromCache = (smiles: string) => {
 
 export const cleanJSMolCache = () => {
   if (!globalThis.jsMolCache) return;
-  console.log('cleaning cache', Object.values(globalThis.jsMolCache).length);
   for (const [smiles, mol] of Object.entries(globalThis.jsMolCache)) {
     mol.delete();
     delete globalThis.jsMolCache[smiles];
   }
-  console.log('cache purged', Object.values(globalThis.jsMolCache).length);
 };
 
 export const cleanAllCache = () => {
