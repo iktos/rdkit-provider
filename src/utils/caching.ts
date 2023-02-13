@@ -1,34 +1,34 @@
 import { JSMol } from '@rdkit/rdkit';
-import { MAX_CACHED_JSMOLS } from '../constants';
 
 export const storeJSMolInCache = (smiles: string, mol: JSMol) => {
-  const nbCachedMolecules = Object.keys(globalThis.jsMolCache ?? {}).length;
-  if (!globalThis.jsMolCache || nbCachedMolecules > MAX_CACHED_JSMOLS) {
+  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled || !globalThis.rdkitProviderGlobals.jsMolCache) return;
+  const nbCachedMolecules = Object.keys(globalThis.rdkitProviderGlobals.jsMolCache).length;
+  if (nbCachedMolecules > globalThis.rdkitProviderGlobals.maxJsMolsCached) {
     cleanJSMolCache();
-    globalThis.jsMolCache = { [smiles]: mol };
+    globalThis.rdkitProviderGlobals.jsMolCache = { [smiles]: mol };
     return;
   }
   try {
-    globalThis.jsMolCache[smiles] = mol;
+    globalThis.rdkitProviderGlobals.jsMolCache[smiles] = mol;
   } catch (e) {
     console.error(e);
     cleanJSMolCache();
-    globalThis.jsMolCache = { [smiles]: mol };
+    globalThis.rdkitProviderGlobals.jsMolCache = { [smiles]: mol };
   }
 };
 
 export const getJSMolFromCache = (smiles: string) => {
-  if (!globalThis.jsMolCache) {
+  if (globalThis.rdkitProviderGlobals.jsMolCacheEnabled || !globalThis.rdkitProviderGlobals.jsMolCache) {
     return null;
   }
-  return globalThis.jsMolCache[smiles];
+  return globalThis.rdkitProviderGlobals.jsMolCache[smiles];
 };
 
 export const cleanJSMolCache = () => {
-  if (!globalThis.jsMolCache) return;
-  for (const [smiles, mol] of Object.entries(globalThis.jsMolCache)) {
+  if (!globalThis.rdkitProviderGlobals.jsMolCache) return;
+  for (const [smiles, mol] of Object.entries(globalThis.rdkitProviderGlobals.jsMolCache)) {
     mol.delete();
-    delete globalThis.jsMolCache[smiles];
+    delete globalThis.rdkitProviderGlobals.jsMolCache[smiles];
   }
 };
 

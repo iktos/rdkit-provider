@@ -7,7 +7,9 @@ export const is_valid_smiles = ({ smiles }: IsValidSmilesParams, RDKit: RDKitMod
   if (!smiles) return false;
   const mol = RDKit.get_mol(smiles);
   const isValid = mol.is_valid();
-  mol.delete();
+  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled) {
+    mol.delete();
+  }
   return isValid;
 };
 
@@ -16,7 +18,9 @@ export const is_valid_smarts = ({ smarts }: IsValidSmartsParams, RDKit: RDKitMod
   if (!smarts) return false;
   const mol = RDKit.get_qmol(smarts);
   const isValid = mol.is_valid();
-  mol.delete();
+  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled) {
+    mol.delete();
+  }
   return isValid;
 };
 

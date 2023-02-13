@@ -1,9 +1,8 @@
 /* eslint-disable no-var */
-import { JSMol, RDKitModule } from '@rdkit/rdkit';
-
-export {};
+import { RDKitModule } from '@rdkit/rdkit';
+import { RDKitProviderGlobals } from './types';
 
 declare global {
   var initRDKitModule: (() => Promise<RDKitModule>) | null;
-  var jsMolCache: Record<string, JSMol> | null;
+  var rdkitProviderGlobals: RDKitProviderGlobals;
 }
