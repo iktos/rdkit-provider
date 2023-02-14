@@ -18,7 +18,7 @@ export const storeJSMolInCache = (smiles: string, mol: JSMol) => {
 };
 
 export const getJSMolFromCache = (smiles: string) => {
-  if (globalThis.rdkitProviderGlobals.jsMolCacheEnabled || !globalThis.rdkitProviderGlobals.jsMolCache) {
+  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled || !globalThis.rdkitProviderGlobals.jsMolCache) {
     return null;
   }
   return globalThis.rdkitProviderGlobals.jsMolCache[smiles];
