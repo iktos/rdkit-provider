@@ -25,7 +25,7 @@ export const getJSMolFromCache = (smiles: string) => {
 };
 
 export const cleanJSMolCache = () => {
-  if (!globalThis.rdkitProviderGlobals.jsMolCache) return;
+  if (!globalThis.rdkitProviderGlobals?.jsMolCache) return;
   for (const [smiles, mol] of Object.entries(globalThis.rdkitProviderGlobals.jsMolCache)) {
     try {
       mol.delete();
