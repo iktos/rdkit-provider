@@ -1,4 +1,4 @@
-import { RDKitModule } from '@rdkit/rdkit';
+import { JSMol, RDKitModule } from '@rdkit/rdkit';
 import { cleanJSMolCache, getJSMolFromCache, storeJSMolInCache } from './caching';
 
 const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
@@ -24,6 +24,13 @@ export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
     console.error(e);
     cleanJSMolCache();
     return get_molecule_memory_unsafe(smiles, RDKit);
+  }
+};
+
+export const release_molecule = (mol: JSMol) => {
+  // to be called after every jsMol instanciation via get_molecule call
+  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled && mol) {
+    mol.delete();
   }
 };
 
