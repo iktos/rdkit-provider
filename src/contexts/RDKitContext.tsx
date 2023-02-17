@@ -22,18 +22,27 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
 
   useEffect(() => {
     let isProviderMounted = true;
-    if (!initialRdkitInstance && globalThis.initRDKitModule) {
-      globalThis.initRDKitModule().then((loadedRDKit) => {
-        if (isProviderMounted) {
-          setRDKit(loadedRDKit);
-          globalThis.rdkitProviderGlobals = {
-            jsMolCacheEnabled: !!enableJsMolCaching,
-            jsMolCache: enableJsMolCaching ? {} : null,
-            maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
-          };
-        }
-      });
-    }
+
+    const initialise = async () => {
+      let loadedRDKit;
+
+      if (!initialRdkitInstance && globalThis.initRDKitModule) {
+        loadedRDKit = await globalThis.initRDKitModule();
+      }
+
+      if (isProviderMounted) {
+        if (loadedRDKit) setRDKit(loadedRDKit);
+
+        globalThis.rdkitProviderGlobals = {
+          jsMolCacheEnabled: !!enableJsMolCaching,
+          jsMolCache: enableJsMolCaching ? {} : null,
+          maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
+        };
+      }
+    };
+
+    initialise().catch(console.error);
+
     return () => {
       isProviderMounted = false;
       cleanAllCache();
