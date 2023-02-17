@@ -24,7 +24,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
     let isProviderMounted = true;
 
     const initialise = async () => {
-      let loadedRDKit;
+      let loadedRDKit: RDKitModule | undefined;
 
       if (!initialRdkitInstance && globalThis.initRDKitModule) {
         loadedRDKit = await globalThis.initRDKitModule();
