@@ -13,7 +13,7 @@ import {
   hasMatchingSubstructure,
   isValidSmarts,
   isValidSmiles,
-} from './utils/molecule';
+} from './utils/chem';
 
 addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   let responsePayload;
