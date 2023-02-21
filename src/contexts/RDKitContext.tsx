@@ -1,13 +1,11 @@
 import { RDKitModule } from '@rdkit/rdkit';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { MAX_CACHED_JSMOLS } from '../constants';
-import { cleanAllCache } from '../utils/caching';
 import { initWorker } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
-import { broadcastLocalResponse } from '../worker/utils/broadcast';
 import { postWorkerJob } from '../worker/utils/postJob';
 
 export interface RDKitContextValue {
+  // TODO remove this and only load rdkit in worker
   RDKit: RDKitModule | null;
   worker: Worker | null;
 }
@@ -30,10 +28,10 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
 }) => {
   const [RDKit, setRDKit] = useState(initialRdkitInstance ?? null);
   const [worker, setWorker] = useState<Worker | null>(null);
-  const { enableJsMolCaching, maxJsMolsCached } = cache;
 
   useEffect(() => {
     let isProviderMounted = true;
+    let workerInstance: Worker | null = null;
 
     const initialise = async () => {
       let loadedRDKit: RDKitModule | undefined;
@@ -42,38 +40,36 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         loadedRDKit = await globalThis.initRDKitModule();
         loadedRDKit.prefer_coordgen(preferCoordgen);
       }
-      const workerInstance = initWorker();
-      if (workerInstance) {
-        // broadcast worker responses to window to allow for processing multi jobs/responses in parallel
-        workerInstance.onmessage = broadcastLocalResponse;
+      if (isProviderMounted && loadedRDKit) {
+        setRDKit(loadedRDKit);
       }
+
+      workerInstance = initWorker();
       // await rdkit module init in worker before starting using the worker
-      await postWorkerJob(workerInstance, { actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE, key: 'worker-init' });
+      await postWorkerJob(workerInstance, {
+        actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
+        key: 'worker-init',
+        payload: { cache },
+      });
       setWorker(workerInstance);
-
-      if (isProviderMounted) {
-        if (loadedRDKit) setRDKit(loadedRDKit);
-
-        globalThis.rdkitProviderGlobals = {
-          jsMolCacheEnabled: !!enableJsMolCaching,
-          jsMolCache: enableJsMolCaching ? {} : null,
-          maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
-        };
-      }
     };
 
     initialise().catch(console.error);
 
     return () => {
       isProviderMounted = false;
-      cleanAllCache();
+      if (!workerInstance) return;
+      postWorkerJob(workerInstance, {
+        actionType: RDKIT_WORKER_ACTIONS.TERMINATE,
+        key: 'worker-terminate',
+      });
     };
-  }, [initialRdkitInstance, enableJsMolCaching, maxJsMolsCached, preferCoordgen]);
+  }, [initialRdkitInstance, cache]);
 
   return <RDKitContext.Provider value={{ RDKit, worker }}>{children}</RDKitContext.Provider>;
 };
 
-interface RDKitProviderCacheOptions {
+export interface RDKitProviderCacheOptions {
   enableJsMolCaching?: boolean;
   maxJsMolsCached?: number;
 }
