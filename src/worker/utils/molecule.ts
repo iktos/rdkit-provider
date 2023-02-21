@@ -33,6 +33,16 @@ export const isValidSmiles = (smiles: string): boolean => {
   return isValid;
 };
 
+export const isValidSmarts = (smarts: string): boolean => {
+  if (!smarts) return false;
+  const mol = globalThis.workerRDKit.get_qmol(smarts);
+  const isValid = mol.is_valid();
+  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
+    mol.delete();
+  }
+  return isValid;
+};
+
 const getCanonicalSmiles = (smiles: string): string | null => {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
   if (!mol) return null;
@@ -46,4 +56,20 @@ const getCanonicalSmarts = (smarts: string): string | null => {
   const canoncialSmarts = mol.get_smarts();
   release_molecule(mol);
   return canoncialSmarts;
+};
+
+export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
+  const smilesMol = get_molecule(smiles, globalThis.workerRDKit);
+  const smartsMol = globalThis.workerRDKit.get_qmol(substructure);
+  if (!smilesMol) return false;
+  const substructureMatchDetails = JSON.parse(smilesMol.get_substruct_match(smartsMol));
+  const smilesDetails = JSON.parse(smilesMol.get_json());
+  const matchDetailsNotEmpty = !!substructureMatchDetails && !!Object.keys(substructureMatchDetails).length;
+
+  return (
+    matchDetailsNotEmpty &&
+    !!smilesDetails.molecules &&
+    smilesDetails.molecules?.length === 1 &&
+    substructureMatchDetails.atoms?.length === smilesDetails.molecules[0]?.atoms?.length
+  );
 };
