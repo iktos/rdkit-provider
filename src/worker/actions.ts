@@ -26,7 +26,7 @@ export const localResponseToResponse = (action: RDKIT_WORKER_ACTIONS_TYPE) =>
 
 export type WorkerMessage = WorkerMessageNarrower & WorkerMessageGerneric;
 
-type WorkerMessageNarrower =
+export type WorkerMessageNarrower =
   | {
       actionType: 'INIT_RDKIT_MODULE';
       key: string;
@@ -66,6 +66,11 @@ type WorkerMessageNarrower =
       actionType: 'TERMINATE';
       key: string;
     };
+
+export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {
+  actionType: ActionType;
+  key: string;
+} & WorkerMessageNarrower;
 
 interface WorkerMessageGerneric {
   actionType: RDKIT_WORKER_ACTIONS_TYPE;
