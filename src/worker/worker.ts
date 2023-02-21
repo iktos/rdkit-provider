@@ -2,7 +2,7 @@ import { RDKitProviderCacheOptions } from '../contexts';
 import { cleanAllCache } from '../utils';
 import { getActionLocalResponseIdentifier, RDKIT_WORKER_ACTIONS, WorkerMessage } from './actions';
 import { initRdkit } from './utils/initRDKit';
-import { getSvg } from './utils/molecule';
+import { getCanonicalFormForStructure, getMoleculeDetails, getSvg } from './utils/molecule';
 
 addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   if (data.actionType === RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE) {
@@ -10,6 +10,26 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
     await initRdkit({ cache: data.payload?.cache as RDKitProviderCacheOptions });
     postMessage({
       actionType: getActionLocalResponseIdentifier(RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE),
+      key: data.key,
+    });
+    return;
+  }
+  if (data.actionType === RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS) {
+    if (!data.payload) return;
+    const details = getMoleculeDetails(data.payload.smiles as string);
+    postMessage({
+      actionType: getActionLocalResponseIdentifier(RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS),
+      payload: { ...details },
+      key: data.key,
+    });
+    return;
+  }
+  if (data.actionType === RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE) {
+    if (!data.payload) return;
+    const canonicalForm = getCanonicalFormForStructure(data.payload.structure as string);
+    postMessage({
+      actionType: getActionLocalResponseIdentifier(RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE),
+      payload: { canonicalForm },
       key: data.key,
     });
     return;
