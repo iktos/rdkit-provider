@@ -29,7 +29,7 @@ export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
 
 export const release_molecule = (mol: JSMol) => {
   // to be called after every jsMol instanciation via get_molecule call
-  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled && mol) {
+  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled && mol) {
     mol.delete();
   }
 };
@@ -39,7 +39,7 @@ export const get_molecule_details = ({ smiles }: GetMoleculeDetailsParams, RDKit
   const mol = get_molecule(smiles, RDKit);
   if (!mol) return null;
   const details = JSON.parse(mol.get_descriptors());
-  if (!globalThis.rdkitProviderGlobals.jsMolCacheEnabled) {
+  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
     mol.delete();
   }
 

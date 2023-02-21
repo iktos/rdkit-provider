@@ -1,14 +1,13 @@
-import { RDKitModule } from '@rdkit/rdkit';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { MAX_CACHED_JSMOLS } from '../constants';
-import { cleanAllCache } from '../utils/caching';
+import { initWorker } from '../worker';
+import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
+import { postWorkerJob } from '../worker/utils/postJob';
 
 export interface RDKitContextValue {
-  RDKit: RDKitModule | null;
+  worker: Worker | null;
 }
 
 export type RDKitProviderProps = PropsWithChildren<{
-  initialRdkitInstance?: RDKitModule;
   cache?: RDKitProviderCacheOptions;
 }>;
 
@@ -16,28 +15,23 @@ export type RDKitProviderProps = PropsWithChildren<{
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RDKitContext = React.createContext<RDKitContextValue>(undefined as any);
 
-export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstance, cache = {}, children }) => {
-  const [RDKit, setRDKit] = useState(initialRdkitInstance ?? null);
-  const { enableJsMolCaching, maxJsMolsCached } = cache;
+export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, children }) => {
+  const [worker, setWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
     let isProviderMounted = true;
+    let workerInstance: Worker | null = null;
 
     const initialise = async () => {
-      let loadedRDKit: RDKitModule | undefined;
-
-      if (!initialRdkitInstance && globalThis.initRDKitModule) {
-        loadedRDKit = await globalThis.initRDKitModule();
-      }
-
-      if (isProviderMounted) {
-        if (loadedRDKit) setRDKit(loadedRDKit);
-
-        globalThis.rdkitProviderGlobals = {
-          jsMolCacheEnabled: !!enableJsMolCaching,
-          jsMolCache: enableJsMolCaching ? {} : null,
-          maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
-        };
+      workerInstance = initWorker();
+      // await rdkit module init in worker before starting using the worker
+      await postWorkerJob(workerInstance, {
+        actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
+        key: 'worker-init',
+        payload: { cache },
+      });
+      if (isProviderMounted && workerInstance) {
+        setWorker(workerInstance);
       }
     };
 
@@ -45,14 +39,18 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
 
     return () => {
       isProviderMounted = false;
-      cleanAllCache();
+      if (!workerInstance) return;
+      postWorkerJob(workerInstance, {
+        actionType: RDKIT_WORKER_ACTIONS.TERMINATE,
+        key: 'worker-terminate',
+      });
     };
-  }, [initialRdkitInstance, enableJsMolCaching, maxJsMolsCached]);
+  }, [cache]);
 
-  return <RDKitContext.Provider value={{ RDKit }}>{children}</RDKitContext.Provider>;
+  return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
 
-interface RDKitProviderCacheOptions {
+export interface RDKitProviderCacheOptions {
   enableJsMolCaching?: boolean;
   maxJsMolsCached?: number;
 }

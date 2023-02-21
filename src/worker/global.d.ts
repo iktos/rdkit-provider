@@ -1,8 +1,9 @@
 /* eslint-disable no-var */
 import { RDKitModule } from '@rdkit/rdkit';
-import { RDKitProviderGlobals } from './types';
+import { RDKitWorkerGlobals } from './types';
 
 declare global {
   var initRDKitModule: (() => Promise<RDKitModule>) | null;
-  var rdkitProviderGlobals: RDKitProviderGlobals;
+  var workerRDKit: RDKitModule;
+  var rdkitWorkerGlobals: RDKitWorkerGlobals;
 }
