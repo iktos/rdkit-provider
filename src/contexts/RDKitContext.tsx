@@ -2,9 +2,14 @@ import { RDKitModule } from '@rdkit/rdkit';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { MAX_CACHED_JSMOLS } from '../constants';
 import { cleanAllCache } from '../utils/caching';
+import { initWorker } from '../worker';
+import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
+import { broadcastLocalResponse } from '../worker/utils/broadcast';
+import { postWorkerJob } from '../worker/utils/postJob';
 
 export interface RDKitContextValue {
   RDKit: RDKitModule | null;
+  worker: Worker | null;
 }
 
 export type RDKitProviderProps = PropsWithChildren<{
@@ -24,6 +29,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   children,
 }) => {
   const [RDKit, setRDKit] = useState(initialRdkitInstance ?? null);
+  const [worker, setWorker] = useState<Worker | null>(null);
   const { enableJsMolCaching, maxJsMolsCached } = cache;
 
   useEffect(() => {
@@ -36,6 +42,14 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         loadedRDKit = await globalThis.initRDKitModule();
         loadedRDKit.prefer_coordgen(preferCoordgen);
       }
+      const workerInstance = initWorker();
+      if (workerInstance) {
+        // broadcast worker responses to window to allow for processing multi jobs/responses in parallel
+        workerInstance.onmessage = broadcastLocalResponse;
+      }
+      // await rdkit module init in worker before starting using the worker
+      await postWorkerJob(workerInstance, { actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE, key: 'worker-init' });
+      setWorker(workerInstance);
 
       if (isProviderMounted) {
         if (loadedRDKit) setRDKit(loadedRDKit);
@@ -56,7 +70,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
     };
   }, [initialRdkitInstance, enableJsMolCaching, maxJsMolsCached, preferCoordgen]);
 
-  return <RDKitContext.Provider value={{ RDKit }}>{children}</RDKitContext.Provider>;
+  return <RDKitContext.Provider value={{ RDKit, worker }}>{children}</RDKitContext.Provider>;
 };
 
 interface RDKitProviderCacheOptions {
