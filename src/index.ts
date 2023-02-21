@@ -1,4 +1,4 @@
 export * from './contexts';
 export * from './hooks';
 export * from './utils';
-export * from './worker';
+export * from './consumer';
