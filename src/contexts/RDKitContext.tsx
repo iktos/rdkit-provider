@@ -1,17 +1,13 @@
-import { RDKitModule } from '@rdkit/rdkit';
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { initWorker } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
 import { postWorkerJob } from '../worker/utils/postJob';
 
 export interface RDKitContextValue {
-  // TODO remove this and only load rdkit in worker
-  RDKit: RDKitModule | null;
   worker: Worker | null;
 }
 
 export type RDKitProviderProps = PropsWithChildren<{
-  initialRdkitInstance?: RDKitModule;
   cache?: RDKitProviderCacheOptions;
 }>;
 
@@ -19,8 +15,7 @@ export type RDKitProviderProps = PropsWithChildren<{
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RDKitContext = React.createContext<RDKitContextValue>(undefined as any);
 
-export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstance, cache = {}, children }) => {
-  const [RDKit, setRDKit] = useState(initialRdkitInstance ?? null);
+export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, children }) => {
   const [worker, setWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
@@ -28,15 +23,6 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
     let workerInstance: Worker | null = null;
 
     const initialise = async () => {
-      let loadedRDKit: RDKitModule | undefined;
-
-      if (!initialRdkitInstance && globalThis.initRDKitModule) {
-        loadedRDKit = await globalThis.initRDKitModule();
-      }
-      if (isProviderMounted && loadedRDKit) {
-        setRDKit(loadedRDKit);
-      }
-
       workerInstance = initWorker();
       // await rdkit module init in worker before starting using the worker
       await postWorkerJob(workerInstance, {
@@ -44,7 +30,9 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
         key: 'worker-init',
         payload: { cache },
       });
-      setWorker(workerInstance);
+      if (isProviderMounted && workerInstance) {
+        setWorker(workerInstance);
+      }
     };
 
     initialise().catch(console.error);
@@ -57,9 +45,9 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
         key: 'worker-terminate',
       });
     };
-  }, [initialRdkitInstance, cache]);
+  }, [cache]);
 
-  return <RDKitContext.Provider value={{ RDKit, worker }}>{children}</RDKitContext.Provider>;
+  return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
 
 export interface RDKitProviderCacheOptions {
