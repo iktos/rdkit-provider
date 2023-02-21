@@ -1,5 +1,6 @@
 import { postWorkerJob } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
+import { PayloadResponseType } from '../worker/worker';
 
 export const getSvgWithHighlight = (
   worker: Worker,
@@ -10,7 +11,7 @@ export const getSvgWithHighlight = (
     actionType: RDKIT_WORKER_ACTIONS.GET_SVG,
     key: key,
     payload: { smiles, drawingDetails },
-  }).then((msg) => msg.payload);
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_SVG'>);
 };
 
 export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string }) => {
@@ -19,7 +20,7 @@ export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string 
     actionType: RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS,
     key: key,
     payload: { smiles },
-  }).then((msg) => msg.payload);
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_MOLECULE_DETAILS'>);
 };
 
 export const getCanonicalFormForStructure = (worker: Worker, { structure }: { structure: string }) => {
@@ -28,7 +29,7 @@ export const getCanonicalFormForStructure = (worker: Worker, { structure }: { st
     actionType: RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE,
     key: key,
     payload: { structure },
-  }).then((msg) => msg.payload);
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>);
 };
 
 export const isValidSmiles = (worker: Worker, { smiles }: { smiles: string }) => {
@@ -37,7 +38,7 @@ export const isValidSmiles = (worker: Worker, { smiles }: { smiles: string }) =>
     actionType: RDKIT_WORKER_ACTIONS.IS_VALID_SMILES,
     key: key,
     payload: { smiles },
-  }).then((msg) => msg.payload as { isValid: boolean });
+  }).then((msg) => msg.payload as PayloadResponseType<'IS_VALID_SMILES'>);
 };
 export const isValidSmarts = (worker: Worker, { smarts }: { smarts: string }) => {
   const key = smarts;
@@ -45,7 +46,7 @@ export const isValidSmarts = (worker: Worker, { smarts }: { smarts: string }) =>
     actionType: RDKIT_WORKER_ACTIONS.IS_VALID_SMARTS,
     key: key,
     payload: { smarts },
-  }).then((msg) => msg.payload as { isValid: boolean });
+  }).then((msg) => msg.payload as PayloadResponseType<'IS_VALID_SMARTS'>);
 };
 export const hasMatchingSubstructure = (
   worker: Worker,
@@ -56,5 +57,5 @@ export const hasMatchingSubstructure = (
     actionType: RDKIT_WORKER_ACTIONS.HAS_MATCHING_SUBSTRUCTURE,
     key: key,
     payload: { smiles, substructure },
-  }).then((msg) => msg.payload as { matching: boolean });
+  }).then((msg) => msg.payload as PayloadResponseType<'HAS_MATCHING_SUBSTRUCTURE'>);
 };
