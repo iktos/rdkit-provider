@@ -9,10 +9,7 @@ export const getSvgWithHighlight = (
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_SVG,
     key: key,
-    payload: {
-      smiles: smiles,
-      drawingDetails: drawingDetails,
-    },
+    payload: { smiles, drawingDetails },
   }).then((msg) => msg.payload);
 };
 
@@ -21,9 +18,7 @@ export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string 
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS,
     key: key,
-    payload: {
-      smiles: smiles,
-    },
+    payload: { smiles },
   }).then((msg) => msg.payload);
 };
 
@@ -32,8 +27,34 @@ export const getCanonicalFormForStructure = (worker: Worker, { structure }: { st
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE,
     key: key,
-    payload: {
-      structure: structure,
-    },
+    payload: { structure },
   }).then((msg) => msg.payload);
+};
+
+export const isValidSmiles = (worker: Worker, { smiles }: { smiles: string }) => {
+  const key = smiles;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.IS_VALID_SMILES,
+    key: key,
+    payload: { smiles },
+  }).then((msg) => msg.payload as { isValid: boolean });
+};
+export const isValidSmarts = (worker: Worker, { smarts }: { smarts: string }) => {
+  const key = smarts;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.IS_VALID_SMARTS,
+    key: key,
+    payload: { smarts },
+  }).then((msg) => msg.payload as { isValid: boolean });
+};
+export const hasMatchingSubstructure = (
+  worker: Worker,
+  { smiles, substructure }: { smiles: string; substructure: string },
+) => {
+  const key = `${smiles}-${substructure}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.HAS_MATCHING_SUBSTRUCTURE,
+    key: key,
+    payload: { smiles, substructure },
+  }).then((msg) => msg.payload as { matching: boolean });
 };
