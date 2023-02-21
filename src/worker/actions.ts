@@ -1,3 +1,5 @@
+import { RDKitProviderCacheOptions } from '../contexts';
+
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
   LOCAL_RESPONSE: 'LOCAL_RESPONSE',
@@ -22,9 +24,51 @@ export const isLocalResponse = (action: RDKIT_WORKER_ACTIONS_TYPE) => action.inc
 export const localResponseToResponse = (action: RDKIT_WORKER_ACTIONS_TYPE) =>
   action.replace('LOCAL_RESPONSE', 'RESPONSE');
 
-export interface WorkerMessage {
-  // TODO make define a type per action to allow for ts narrowing and infering return type in postJob
+export type WorkerMessage = WorkerMessageNarrower & WorkerMessageGerneric;
+
+type WorkerMessageNarrower =
+  | {
+      actionType: 'INIT_RDKIT_MODULE';
+      key: string;
+      payload: { cache: RDKitProviderCacheOptions };
+    }
+  | {
+      actionType: 'GET_SVG';
+      key: string;
+      payload: { smiles: string; drawingDetails: string };
+    }
+  | {
+      actionType: 'GET_MOLECULE_DETAILS';
+      key: string;
+      payload: { smiles: string };
+    }
+  | {
+      actionType: 'GET_CANONICAL_FORM_FOR_STRUCTURE';
+      key: string;
+      payload: { structure: string };
+    }
+  | {
+      actionType: 'IS_VALID_SMILES';
+      key: string;
+      payload: { smiles: string };
+    }
+  | {
+      actionType: 'IS_VALID_SMARTS';
+      key: string;
+      payload: { smarts: string };
+    }
+  | {
+      actionType: 'HAS_MATCHING_SUBSTRUCTURE';
+      key: string;
+      payload: { smiles: string; substructure: string };
+    }
+  | {
+      actionType: 'TERMINATE';
+      key: string;
+    };
+
+interface WorkerMessageGerneric {
   actionType: RDKIT_WORKER_ACTIONS_TYPE;
   key: string;
-  payload?: Record<string, unknown>;
+  payload?: unknown;
 }
