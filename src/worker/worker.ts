@@ -19,7 +19,7 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   let responsePayload;
   switch (data.actionType) {
     case RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE:
-      await initRdkit({ cache: data.payload?.cache });
+      await initRdkit({ cache: data.payload.cache, preferCoordgen: data.payload.preferCoordgen });
       break;
     case RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS:
       responsePayload = getMoleculeDetails(data.payload.smiles) satisfies PayloadResponseType<'GET_MOLECULE_DETAILS'>;
