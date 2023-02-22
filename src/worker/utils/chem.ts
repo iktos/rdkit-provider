@@ -1,4 +1,4 @@
-import { get_molecule, release_molecule } from '../../utils';
+import { get_molecule, release_molecule } from './molecule';
 
 export const getSvg = ({
   smiles,
