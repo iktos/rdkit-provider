@@ -19,6 +19,18 @@ export const getSvg = (
   }).then((msg) => msg.payload as PayloadResponseType<'GET_SVG'>);
 };
 
+export const getSvgFromSmarts = (
+  worker: Worker,
+  { smarts, width, height }: { smarts: string; width: number; height: number },
+) => {
+  const key = `${smarts}-${width}-${height}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_SVG_FROM_SMARTS,
+    key: key,
+    payload: { smarts, width, height },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_SVG_FROM_SMARTS'>);
+};
+
 export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string }) => {
   const key = smiles;
   return postWorkerJob(worker, {
