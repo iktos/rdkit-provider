@@ -9,13 +9,14 @@ export interface RDKitContextValue {
 
 export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
+  preferCoordgen?: boolean;
 }>;
 
 // force default context to be undefined, to check if package users have wrapped it with the required provider
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RDKitContext = React.createContext<RDKitContextValue>(undefined as any);
 
-export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, children }) => {
+export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, preferCoordgen = false, children }) => {
   const [worker, setWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, childr
       await postWorkerJob(workerInstance, {
         actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
         key: 'worker-init',
-        payload: { cache },
+        payload: { cache, preferCoordgen },
       });
       if (isProviderMounted && workerInstance) {
         setWorker(workerInstance);
@@ -45,7 +46,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ cache = {}, childr
         key: 'worker-terminate',
       });
     };
-  }, [cache]);
+  }, [cache, preferCoordgen]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
