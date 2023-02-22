@@ -11,6 +11,7 @@ import {
   getMatchingSubstructure,
   getMoleculeDetails,
   getSvg,
+  getSvgFromSmarts,
   hasMatchingSubstructure,
   isValidSmarts,
   isValidSmiles,
@@ -34,6 +35,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       responsePayload = {
         svg: getSvg(data.payload),
       } satisfies PayloadResponseType<'GET_SVG'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.GET_SVG_FROM_SMARTS:
+      responsePayload = {
+        svg: getSvgFromSmarts(data.payload),
+      } satisfies PayloadResponseType<'GET_SVG_FROM_SMARTS'>;
       break;
     case RDKIT_WORKER_ACTIONS.IS_VALID_SMILES:
       responsePayload = {
@@ -67,11 +73,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   });
 });
 
-export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = ActionType extends 'GET_SVG'
+export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = ActionType extends
+  | 'GET_SVG'
+  | 'GET_SVG_FROM_SMARTS'
   ? { svg: string | null }
-  : ActionType extends 'IS_VALID_SMILES'
-  ? { isValid: boolean }
-  : ActionType extends 'IS_VALID_SMARTS'
+  : ActionType extends 'IS_VALID_SMILES' | 'IS_VALID_SMARTS'
   ? { isValid: boolean }
   : ActionType extends 'GET_CANONICAL_FORM_FOR_STRUCTURE'
   ? { canonicalForm: string | null }

@@ -6,6 +6,7 @@ export const RDKIT_WORKER_ACTIONS = {
   LOCAL_RESPONSE: 'LOCAL_RESPONSE',
   BROADCASTED_RESPONSE: 'BROADCASTED_RESPONSE',
   GET_SVG: 'GET_SVG',
+  GET_SVG_FROM_SMARTS: 'GET_SVG_FROM_SMARTS',
   GET_MOLECULE_DETAILS: 'GET_MOLECULE_DETAILS',
   GET_CANONICAL_FORM_FOR_STRUCTURE: 'GET_CANONICAL_FORM_FOR_STRUCTURE',
   IS_VALID_SMILES: 'IS_VALID_SMILES',
@@ -38,6 +39,11 @@ export type WorkerMessageNarrower =
       actionType: 'GET_SVG';
       key: string;
       payload: { smiles: string; drawingDetails: string; alignmentDetails?: AlignmentDetails };
+    }
+  | {
+      actionType: 'GET_SVG_FROM_SMARTS';
+      key: string;
+      payload: { smarts: string; width: number; height: number };
     }
   | {
       actionType: 'GET_MOLECULE_DETAILS';

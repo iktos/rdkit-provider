@@ -26,6 +26,13 @@ export const getSvg = ({
   return svg;
 };
 
+export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; width: number; height: number }) => {
+  const smartsMol = globalThis.workerRDKit.get_qmol(smarts);
+  const svg = smartsMol.get_svg(width, height);
+  smartsMol.delete();
+  return svg;
+};
+
 export const getMoleculeDetails = (smiles: string) => {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
   if (!mol) return null;
