@@ -8,6 +8,7 @@ import {
 import { initRdkit } from './utils/initRDKit';
 import {
   getCanonicalFormForStructure,
+  getMatchingSubstructure,
   getMoleculeDetails,
   getSvg,
   hasMatchingSubstructure,
@@ -19,7 +20,7 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   let responsePayload;
   switch (data.actionType) {
     case RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE:
-      await initRdkit({ cache: data.payload.cache, preferCoordgen: data.payload.preferCoordgen });
+      await initRdkit(data.payload);
       break;
     case RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS:
       responsePayload = getMoleculeDetails(data.payload.smiles) satisfies PayloadResponseType<'GET_MOLECULE_DETAILS'>;
@@ -31,7 +32,7 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       break;
     case RDKIT_WORKER_ACTIONS.GET_SVG:
       responsePayload = {
-        svg: getSvg(data.payload.smiles, data.payload.drawingDetails),
+        svg: getSvg(data.payload),
       } satisfies PayloadResponseType<'GET_SVG'>;
       break;
     case RDKIT_WORKER_ACTIONS.IS_VALID_SMILES:
@@ -46,11 +47,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       break;
     case RDKIT_WORKER_ACTIONS.HAS_MATCHING_SUBSTRUCTURE:
       responsePayload = {
-        matching: hasMatchingSubstructure({
-          smiles: data.payload.smiles,
-          substructure: data.payload.substructure,
-        }),
+        matching: hasMatchingSubstructure(data.payload),
       } satisfies PayloadResponseType<'HAS_MATCHING_SUBSTRUCTURE'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.GET_SUBSTRUCTURE_MATCH:
+      responsePayload = getMatchingSubstructure(data.payload) satisfies PayloadResponseType<'GET_SUBSTRUCTURE_MATCH'>;
       break;
     case RDKIT_WORKER_ACTIONS.TERMINATE:
       cleanAllCache();
@@ -76,6 +77,8 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? { canonicalForm: string | null }
   : ActionType extends 'HAS_MATCHING_SUBSTRUCTURE'
   ? { matching: boolean }
+  : ActionType extends 'GET_SUBSTRUCTURE_MATCH'
+  ? { matchingAtoms: number[]; matchingBonds: number[] } | null
   : ActionType extends 'GET_MOLECULE_DETAILS'
   ? {
       numAtoms: number;

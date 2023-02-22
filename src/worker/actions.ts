@@ -1,4 +1,5 @@
 import { RDKitProviderCacheOptions } from '../contexts';
+import { AlignmentDetails } from './utils/chem';
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
@@ -10,6 +11,7 @@ export const RDKIT_WORKER_ACTIONS = {
   IS_VALID_SMILES: 'IS_VALID_SMILES',
   IS_VALID_SMARTS: 'IS_VALID_SMARTS',
   HAS_MATCHING_SUBSTRUCTURE: 'HAS_MATCHING_SUBSTRUCTURE',
+  GET_SUBSTRUCTURE_MATCH: 'GET_SUBSTRUCTURE_MATCH',
   TERMINATE: 'TERMINATE',
 } as const;
 
@@ -35,7 +37,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_SVG';
       key: string;
-      payload: { smiles: string; drawingDetails: string };
+      payload: { smiles: string; drawingDetails: string; alignmentDetails?: AlignmentDetails };
     }
   | {
       actionType: 'GET_MOLECULE_DETAILS';
@@ -61,6 +63,11 @@ export type WorkerMessageNarrower =
       actionType: 'HAS_MATCHING_SUBSTRUCTURE';
       key: string;
       payload: { smiles: string; substructure: string };
+    }
+  | {
+      actionType: 'GET_SUBSTRUCTURE_MATCH';
+      key: string;
+      payload: { structure: string; substructure: string };
     }
   | {
       actionType: 'TERMINATE';
