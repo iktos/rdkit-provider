@@ -1,9 +1,27 @@
 import { get_molecule, release_molecule } from '../../utils';
 
-export const getSvg = (smiles: string, drawingDetails: string) => {
+export const getSvg = ({
+  smiles,
+  drawingDetails,
+  alignmentDetails,
+}: {
+  smiles: string;
+  drawingDetails: string;
+  alignmentDetails?: AlignmentDetails;
+}) => {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
   if (!mol) return null;
+  if (alignmentDetails) {
+    const molToAlignWith = get_molecule(alignmentDetails.molBlock, globalThis.workerRDKit);
+    if (!molToAlignWith) return null;
+    mol.generate_aligned_coords(molToAlignWith, true);
+    release_molecule(molToAlignWith);
+  }
   const svg = mol.get_svg_with_highlights(drawingDetails);
+  if (alignmentDetails) {
+    // reset coords as mol could be in cache
+    mol.set_new_coords();
+  }
   release_molecule(mol);
   return svg;
 };
@@ -73,3 +91,20 @@ export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: stri
     substructureMatchDetails.atoms?.length === smilesDetails.molecules[0]?.atoms?.length
   );
 };
+
+export const getMatchingSubstructure = ({ structure, substructure }: { structure: string; substructure: string }) => {
+  const mol = get_molecule(structure, globalThis.workerRDKit);
+  const molToMach = get_molecule(substructure, globalThis.workerRDKit);
+  if (!mol || !molToMach) return null;
+  const { atoms, bonds } = JSON.parse(mol.get_substruct_match(molToMach)) as { atoms: number[]; bonds: number[] };
+  release_molecule(mol);
+  release_molecule(molToMach);
+
+  return { matchingAtoms: atoms, matchingBonds: bonds };
+};
+
+export interface AlignmentDetails {
+  molBlock: string;
+  highlightColor?: RDKitColor;
+}
+type RDKitColor = number[];
