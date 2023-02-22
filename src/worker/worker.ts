@@ -1,4 +1,4 @@
-import { cleanAllCache } from '../utils';
+import { cleanAllCache } from './utils/caching';
 import {
   getActionLocalResponseIdentifier,
   RDKIT_WORKER_ACTIONS,
