@@ -9,6 +9,7 @@ export interface RDKitContextValue {
 
 export type RDKitProviderProps = PropsWithChildren<{
   initialRdkitInstance?: RDKitModule;
+  preferCoordgen?: boolean;
   cache?: RDKitProviderCacheOptions;
 }>;
 
@@ -16,7 +17,12 @@ export type RDKitProviderProps = PropsWithChildren<{
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const RDKitContext = React.createContext<RDKitContextValue>(undefined as any);
 
-export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstance, cache = {}, children }) => {
+export const RDKitProvider: React.FC<RDKitProviderProps> = ({
+  initialRdkitInstance,
+  preferCoordgen = false,
+  cache = {},
+  children,
+}) => {
   const [RDKit, setRDKit] = useState(initialRdkitInstance ?? null);
   const { enableJsMolCaching, maxJsMolsCached } = cache;
 
@@ -28,6 +34,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
 
       if (!initialRdkitInstance && globalThis.initRDKitModule) {
         loadedRDKit = await globalThis.initRDKitModule();
+        loadedRDKit.prefer_coordgen(preferCoordgen);
       }
 
       if (isProviderMounted) {
@@ -47,7 +54,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({ initialRdkitInstan
       isProviderMounted = false;
       cleanAllCache();
     };
-  }, [initialRdkitInstance, enableJsMolCaching, maxJsMolsCached]);
+  }, [initialRdkitInstance, enableJsMolCaching, maxJsMolsCached, preferCoordgen]);
 
   return <RDKitContext.Provider value={{ RDKit }}>{children}</RDKitContext.Provider>;
 };
