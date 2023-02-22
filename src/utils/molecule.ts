@@ -7,11 +7,7 @@ const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
   if (!smiles) return null;
   if (!RDKit) return null;
 
-  const tempMolecule = RDKit.get_mol(smiles);
-  const mdlWithCoords = tempMolecule.get_new_coords(true);
-  tempMolecule.delete();
-
-  const mol = RDKit.get_mol(mdlWithCoords);
+  const mol = RDKit.get_mol(smiles);
   storeJSMolInCache(smiles, mol);
   return mol;
 };
