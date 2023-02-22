@@ -21,6 +21,22 @@ import { RDKitProvider } from '@iktos/rdkit-provider';
 </RDKitProvider>
 ```
 
+you can also enable caching for molecule, which would enhance performance
+```html
+import { RDKitProvider } from '@iktos/rdkit-provider';
+<RDKitProvider cache={{ enableJsMolCaching: true, maxJsMolsCached: 50 }}>
+  <Component />
+</RDKitProvider>
+```
+
+Options that can be passed to  ```RDKitProvider ```:
+
+| prop  | type | functionality | required/optional |
+| ------------- | ------------- | ------------- | ------------- |
+| cache  | ```RDKitProviderCacheOptions = { enableJsMolCaching?: boolean; maxJsMolsCached?: number; }```  | enables ```JSMol``` caching for better performance | optional  |
+| preferCoordgen  | ```boolean```  | will be passed to [@rdkit/rdkitjs prefer_coordgen](https://docs.rdkitjs.com/interfaces/RDKitModule.html#prefer_coordgen.prefer_coordgen-1) to use Schrodinger’s open-source Coordgen library to generate 2D coordinates of molecules | optional  |    
+| ```initialRdkitInstance```  | ```RDKitModule``` from ```@rdkit/rdkitjs``` | pass an instance of to expose by the context `RDKitModule`, if not passed rdkit-provider creates one for you  | optional  |
+
 you can consume RDKit in your components by calling `useRDKit`
 
 ```js
@@ -59,13 +75,5 @@ const Component = () => {
 };
 ```
 
-You can choose to pass it your own `RDKitModule` instance by doing
 
-```html
-import { RDKitProvider } from '@iktos/rdkit-provider';
-<RDKitProvider initialRdkitInstance="{RDKitModule}">
-  <Component />
-</RDKitProvider>
-```
-
-Example of usage can be found in github.com/iktos/molecule-representation
+Example of usage can be found in [github.com/iktos/molecule-representation](github.com/iktos/molecule-representation)
