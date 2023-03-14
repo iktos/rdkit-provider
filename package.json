@@ -1,8 +1,8 @@
 {
   "name": "@iktos-oss/rdkit-provider",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "description": "exports an initialized RDKit instance, with helper functions",
-  "main": "lib/esm/index.js",
+  "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "files": [
     "lib"
@@ -20,9 +20,10 @@
     "url": "git+https://github.com/iktos/rdkit-provider.git"
   },
   "scripts": {
-    "build": "rm -rf lib/ && npm run build:esm && npm run build:cp",
-    "build:esm": "tsc",
-    "build:cp": "cp package.json README.md ./lib",
+    "build": "rm -rf lib/ && npm run build:esm && npm run build:cjs && npm run bundle:worker",
+    "build:esm": "tsc -p tsconfig.no-worker.json",
+    "build:cjs": "tsc -p tsconfig.no-worker.json --module CommonJS --outDir lib/cjs",
+    "bundle:worker": "rm -rf worker-lib/ && webpack --mode production --config worker.config.js && cp ./worker-lib/rdk-worker.js ./lib && rm -R worker-lib",
     "test": "exit 0",
     "lint-check": "npx eslint --max-warnings 0 \"src/**/*.@(tsx|ts|jsx|js)\"",
     "style-check": "npx prettier --list-different \"src/**/*.@(tsx|ts|jsx|js)\"",
@@ -45,7 +46,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
-    "typescript": "^4.9.4"
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
     "@rdkit/rdkit": "^2022.9.3-1.0.0",
