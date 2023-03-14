@@ -1,4 +1,5 @@
 .DS_Store
 lib
+worker-lib
 node_modules
 tsconfig.tsbuildinfo
