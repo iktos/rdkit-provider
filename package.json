@@ -23,7 +23,7 @@
     "build": "rm -rf lib/ && npm run build:esm && npm run build:cjs && npm run bundle:worker",
     "build:esm": "tsc -p tsconfig.no-worker.json",
     "build:cjs": "tsc -p tsconfig.no-worker.json --module CommonJS --outDir lib/cjs",
-    "bundle:worker": "rm -rf worker-lib/ && webpack --mode production --config worker.config.js && cp ./worker-lib/rdk-worker.js ./lib && rm -R worker-lib",
+    "bundle:worker": "rm -rf worker-lib/ && webpack --mode production --config worker.config.js && cp ./worker-lib/rdkit-worker.js ./lib && rm -R worker-lib",
     "test": "exit 0",
     "lint-check": "npx eslint --max-warnings 0 \"src/**/*.@(tsx|ts|jsx|js)\"",
     "style-check": "npx prettier --list-different \"src/**/*.@(tsx|ts|jsx|js)\"",
