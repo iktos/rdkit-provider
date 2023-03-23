@@ -35,5 +35,5 @@ const initWorkerCache = (cache: RDKitProviderCacheOptions) => {
 interface InitWorkerOptions {
   preferCoordgen: boolean;
   cache?: RDKitProviderCacheOptions;
-  initialRdkitInstance: RDKitModule;
+  initialRdkitInstance?: RDKitModule;
 }

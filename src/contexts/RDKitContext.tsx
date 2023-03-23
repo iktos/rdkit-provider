@@ -11,8 +11,8 @@ export interface RDKitContextValue {
 export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
   preferCoordgen?: boolean;
-  rdkitWorkerPath: string;
-  initialRdkitInstance: RDKitModule;
+  rdkitWorkerPath?: string;
+  initialRdkitInstance?: RDKitModule;
 }>;
 
 // force default context to be undefined, to check if package users have wrapped it with the required provider
