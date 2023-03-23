@@ -1,4 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
+import { RDKitModule } from '@rdkit/rdkit';
 import { initWorker } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
 import { postWorkerJob } from '../worker/utils/postJob';
@@ -11,6 +12,7 @@ export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
   preferCoordgen?: boolean;
   rdkitWorkerPath: string;
+  initialRdkitInstance: RDKitModule;
 }>;
 
 // force default context to be undefined, to check if package users have wrapped it with the required provider
@@ -21,6 +23,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   cache = {},
   preferCoordgen = false,
   rdkitWorkerPath,
+  initialRdkitInstance,
   children,
 }) => {
   const [worker, setWorker] = useState<Worker | null>(null);
@@ -35,7 +38,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
       await postWorkerJob(workerInstance, {
         actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
         key: 'worker-init',
-        payload: { cache, preferCoordgen },
+        payload: { cache, preferCoordgen, initialRdkitInstance },
       });
       if (isProviderMounted && workerInstance) {
         setWorker(workerInstance);
@@ -52,11 +55,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         key: 'worker-terminate',
       });
     };
-  }, [
-    cache, 
-    preferCoordgen, 
-    rdkitWorkerPath, 
-]);
+  }, [cache, preferCoordgen, rdkitWorkerPath, initialRdkitInstance]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };

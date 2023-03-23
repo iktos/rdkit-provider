@@ -1,3 +1,4 @@
+import { RDKitModule } from '@rdkit/rdkit';
 import { RDKitProviderCacheOptions } from '../contexts';
 import { AlignmentDetails } from './utils/chem';
 
@@ -33,7 +34,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'INIT_RDKIT_MODULE';
       key: string;
-      payload: { cache: RDKitProviderCacheOptions; preferCoordgen: boolean };
+      payload: { cache: RDKitProviderCacheOptions; preferCoordgen: boolean; initialRdkitInstance: RDKitModule };
     }
   | {
       actionType: 'GET_SVG';
