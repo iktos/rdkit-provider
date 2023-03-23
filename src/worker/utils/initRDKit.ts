@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -25,16 +25,19 @@
 import { MAX_CACHED_JSMOLS } from '../../constants';
 import { RDKitProviderCacheOptions } from '../../contexts';
 
-export const initRdkit = async ({ preferCoordgen, removeHs, cache = {} }: InitWorkerOptions) => {
+export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {} }: InitWorkerOptions) => {
   if (cache) {
     initWorkerCache({ cache, removeHs });
   }
+
+  if (globalThis.workerRDKit) return;
+
+  const path = rdkitPath || '/RDKit_minimal.js';
+  const url = new URL(path, globalThis.origin);
   //@ts-ignore
-  importScripts(`${globalThis.origin}/RDKit_minimal.js`);
+  importScripts(url);
   if (!globalThis.initRDKitModule) return;
-  await globalThis.initRDKitModule().then((rdkitModule) => {
-    globalThis.workerRDKit = rdkitModule;
-  });
+  globalThis.workerRDKit = await globalThis.initRDKitModule();
   globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
 };
 
@@ -54,4 +57,5 @@ interface InitWorkerOptions {
   preferCoordgen: boolean;
   removeHs: boolean;
   cache?: RDKitProviderCacheOptions;
+  rdkitPath?: string;
 }
