@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -35,6 +35,9 @@ export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
   preferCoordgen?: boolean;
   removeHs?: boolean;
+  rdkitPath?: string;
+  rdkitWorkerPath?: string;
+  initailWorkerInstance?: Worker;
 }>;
 
 // force default context to be undefined, to check if package users have wrapped it with the required provider
@@ -45,24 +48,30 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   cache = {},
   preferCoordgen = false,
   removeHs = true,
+  initailWorkerInstance = null,
+  rdkitPath,
+  rdkitWorkerPath,
   children,
 }) => {
   const [worker, setWorker] = useState<Worker | null>(null);
 
   useEffect(() => {
     let isProviderMounted = true;
-    let workerInstance: Worker | null = null;
+    let workerInstance: Worker | null = initailWorkerInstance;
 
     const initialise = async () => {
-      workerInstance = initWorker();
-      // await rdkit module init in worker before starting using the worker
-      await postWorkerJob(workerInstance, {
-        actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
-        key: 'worker-init',
-        payload: { cache, preferCoordgen, removeHs },
-      });
-      if (isProviderMounted && workerInstance) {
-        setWorker(workerInstance);
+      if (!workerInstance) {
+        workerInstance = initWorker(rdkitWorkerPath);
+
+        // await rdkit module init in worker before starting using the worker
+        await postWorkerJob(workerInstance, {
+          actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
+          key: 'worker-init',
+          payload: { rdkitPath, cache, preferCoordgen, removeHs },
+        });
+        if (isProviderMounted && workerInstance) {
+          setWorker(workerInstance);
+        }
       }
     };
 
@@ -76,7 +85,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         key: 'worker-terminate',
       });
     };
-  }, [cache, preferCoordgen, removeHs]);
+  }, [initailWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPath, removeHs]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
