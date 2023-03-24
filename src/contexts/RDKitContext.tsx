@@ -10,6 +10,7 @@ export interface RDKitContextValue {
 export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
   preferCoordgen?: boolean;
+  rdkitPath?: string;
   rdkitWorkerPath?: string;
 }>;
 
@@ -20,6 +21,7 @@ export const RDKitContext = React.createContext<RDKitContextValue>(undefined as 
 export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   cache = {},
   preferCoordgen = false,
+  rdkitPath,
   rdkitWorkerPath,
   children,
 }) => {
@@ -35,7 +37,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
       await postWorkerJob(workerInstance, {
         actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
         key: 'worker-init',
-        payload: { cache, preferCoordgen },
+        payload: { rdkitPath, cache, preferCoordgen },
       });
       if (isProviderMounted && workerInstance) {
         setWorker(workerInstance);
@@ -52,7 +54,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         key: 'worker-terminate',
       });
     };
-  }, [cache, preferCoordgen, rdkitWorkerPath]);
+  }, [cache, preferCoordgen, rdkitPath, rdkitWorkerPath]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };

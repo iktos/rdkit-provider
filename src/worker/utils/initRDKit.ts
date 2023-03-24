@@ -1,12 +1,15 @@
 import { MAX_CACHED_JSMOLS } from '../../constants';
 import { RDKitProviderCacheOptions } from '../../contexts';
 
-export const initRdkit = async ({ preferCoordgen, cache = {} }: InitWorkerOptions) => {
+export const initRdkit = async ({ rdkitPath, preferCoordgen, cache = {} }: InitWorkerOptions) => {
   if (cache) {
     initWorkerCache(cache);
   }
+
+  const path = rdkitPath || '/RDKit_minimal.js';
+  const url = new URL(path, globalThis.origin);
   //@ts-ignore
-  importScripts(`${globalThis.origin}/RDKit_minimal.js`);
+  importScripts(url);
   if (!globalThis.initRDKitModule) return;
   await globalThis.initRDKitModule().then((rdkitModule) => {
     globalThis.workerRDKit = rdkitModule;
@@ -28,4 +31,5 @@ const initWorkerCache = (cache: RDKitProviderCacheOptions) => {
 interface InitWorkerOptions {
   preferCoordgen: boolean;
   cache?: RDKitProviderCacheOptions;
+  rdkitPath?: string;
 }
