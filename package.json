@@ -19,6 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/iktos/rdkit-provider.git"
   },
+  "license": "MIT",
   "scripts": {
     "build": "rm -rf lib/ && npm run build:esm && npm run build:cjs && npm run bundle:worker",
     "build:esm": "tsc -p tsconfig.no-worker.json",
