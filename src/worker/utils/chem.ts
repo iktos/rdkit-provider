@@ -134,8 +134,175 @@ export const getMatchingSubstructure = ({ structure, substructure }: { structure
   return { matchingAtoms: atoms, matchingBonds: bonds };
 };
 
+export const isValidMolBlock = (mdl: string) => {
+  if (!mdl.includes('M  END')) return false;
+  const mol = get_molecule(mdl, globalThis.workerRDKit);
+  if (!mol) return false;
+  try {
+    return mol.is_valid();
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+/**
+ * Convert a molecule structure to smarts using query molecule (qmol)
+ * @param structure Molecule structure, can be SMILES or molblock
+ * @returns Smarts string
+ */
+export const getQMolSmarts = (structure: string): string => {
+  let qmol;
+  try {
+    qmol = globalThis.workerRDKit.get_qmol(structure);
+    return qmol.get_smarts();
+  } finally {
+    qmol?.delete();
+  }
+};
+
+/**
+ * Convert molecule structure to given notation (smiles, smarts, molblock, ...)
+ */
+export const convertMolNotation = ({
+  moleculeString,
+  targetNotation,
+  sourceNotation,
+}: {
+  moleculeString: string;
+  targetNotation: MolNotation;
+  sourceNotation?: SourceMolNotation;
+}): string | null => {
+  if (sourceNotation != null) {
+    if (sourceNotation === targetNotation) throw new Error('Source and target notations must differ');
+    if (!_validateSource(moleculeString, sourceNotation)) throw new Error('Molecule string not valid');
+  }
+  const mol = get_molecule(moleculeString, globalThis.workerRDKit);
+  if (!mol) return null;
+  try {
+    return mol[`get_${targetNotation}`]();
+  } catch (e) {
+    console.error(e);
+    throw new Error('Target notation not implemented');
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+export const getNewCoords = (structure: string, useCoordGen?: boolean) => {
+  const mol = get_molecule(structure, globalThis.workerRDKit);
+  if (!mol) return null;
+  try {
+    const mdl = useCoordGen != null ? mol.get_new_coords(useCoordGen) : mol.get_new_coords();
+    return mdl;
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+export const removeHs = (structure: string) => {
+  const mol = get_molecule(structure, globalThis.workerRDKit);
+  if (!mol) return null;
+  try {
+    const mdl = mol.remove_hs();
+    return getNewCoords(mdl, false);
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+export const addHs = (structure: string) => {
+  const mol = get_molecule(structure, globalThis.workerRDKit);
+  if (!mol) return null;
+
+  try {
+    let mdl: string | null = mol.add_hs();
+    mdl = getNewCoords(mdl, false);
+
+    return mdl;
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+const _validateSource = (structure: string, sourceNotation: SourceMolNotation) => {
+  switch (sourceNotation) {
+    case 'molblock':
+      return isValidMolBlock(structure);
+    case 'smiles':
+      return isValidSmiles(structure);
+    case 'smarts':
+      return isValidSmiles(structure);
+    default:
+      throw new Error(`not implemented: validate ${sourceNotation}`);
+  }
+};
+
 export interface AlignmentDetails {
   molBlock: string;
   highlightColor?: RDKitColor;
 }
 type RDKitColor = number[];
+
+// TODO use enum or other
+export type MolNotation =
+  | 'aromatic_form'
+  | 'cxsmiles'
+  | 'inchi'
+  | 'kekule_form'
+  | 'molblock'
+  | 'smarts'
+  | 'smiles'
+  | 'v3Kmolblock';
+
+export type SourceMolNotation = 'smarts' | 'smiles' | 'molblock';
+
+export type Descriptors = {
+  amw: number;
+  chi0n: number;
+  chi0v: number;
+  chi1n: number;
+  chi1v: number;
+  chi2n: number;
+  chi2v: number;
+  chi3n: number;
+  chi3v: number;
+  chi4n: number;
+  chi4v: number;
+  CrippenClogP: number;
+  CrippenMR: number;
+  exactmw: number;
+  FractionCSP3: number;
+  hallKierAlpha: number;
+  kappa1: number;
+  kappa2: number;
+  kappa3: number;
+  labuteASA: number;
+  lipinskiHBA: number;
+  lipinskiHBD: number;
+  NumAliphaticHeterocycles: number;
+  NumAliphaticRings: number;
+  NumAmideBonds: number;
+  NumAromaticHeterocycles: number;
+  NumAromaticRings: number;
+  NumAtoms: number;
+  NumAtomStereoCenters: number;
+  NumBridgeheadAtoms: number;
+  NumHBA: number;
+  NumHBD: number;
+  NumHeavyAtoms: number;
+  NumHeteroatoms: number;
+  NumHeterocycles: number;
+  NumRings: number;
+  NumRotatableBonds: number;
+  NumSaturatedHeterocycles: number;
+  NumSaturatedRings: number;
+  NumSpiroAtoms: number;
+  NumUnspecifiedAtomStereoCenters: number;
+  Phi: number;
+  tpsa: number;
+};
+
+export type SubstructMatch = {
+  atoms?: number[];
+  bonds?: number[];
+};

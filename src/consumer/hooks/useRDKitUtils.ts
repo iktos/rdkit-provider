@@ -23,7 +23,18 @@
 */
 
 import { useCallback } from 'react';
-import { getMoleculeDetails, hasMatchingSubstructure, isValidSmarts, isValidSmiles } from '..';
+import {
+  addHs,
+  convertMolNotation,
+  getMoleculeDetails,
+  getNewCoords,
+  getQMolSmarts,
+  hasMatchingSubstructure,
+  isValidMolBlock,
+  isValidSmarts,
+  isValidSmiles,
+  removeHs,
+} from '..';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
 import { useRDKit } from '../../hooks/useRDKit';
@@ -57,6 +68,48 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_MOLECULE_DETAILS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getMoleculeDetails(worker, params);
+      },
+      [worker],
+    ),
+    isValidMolblock: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_MOLBLOCK'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return isValidMolBlock(worker, params);
+      },
+      [worker],
+    ),
+    convertMolNotation: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'CONVERT_MOL_NOTATION'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return convertMolNotation(worker, params);
+      },
+      [worker],
+    ),
+    addHs: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'ADD_HS'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return addHs(worker, params);
+      },
+      [worker],
+    ),
+    removeHs: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'REMOVE_HS'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return removeHs(worker, params);
+      },
+      [worker],
+    ),
+    getQMolSmarts: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_QMOL_SMARTS'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getQMolSmarts(worker, params);
+      },
+      [worker],
+    ),
+    getNewCoords: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_NEW_COORDS'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getNewCoords(worker, params);
       },
       [worker],
     ),

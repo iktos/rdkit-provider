@@ -23,7 +23,7 @@
 */
 
 import { RDKitProviderCacheOptions } from '../contexts';
-import { AlignmentDetails } from './utils/chem';
+import { AlignmentDetails, MolNotation, SourceMolNotation } from './utils/chem';
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
@@ -38,6 +38,12 @@ export const RDKIT_WORKER_ACTIONS = {
   HAS_MATCHING_SUBSTRUCTURE: 'HAS_MATCHING_SUBSTRUCTURE',
   GET_SUBSTRUCTURE_MATCH: 'GET_SUBSTRUCTURE_MATCH',
   TERMINATE: 'TERMINATE',
+  CONVERT_MOL_NOTATION: 'CONVERT_MOL_NOTATION',
+  IS_VALID_MOLBLOCK: 'IS_VALID_MOLBLOCK',
+  GET_QMOL_SMARTS: 'GET_QMOL_SMARTS',
+  REMOVE_HS: 'REMOVE_HS',
+  ADD_HS: 'ADD_HS',
+  GET_NEW_COORDS: 'GET_NEW_COORDS',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -102,6 +108,36 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'TERMINATE';
       key: string;
+    }
+  | {
+      actionType: 'CONVERT_MOL_NOTATION';
+      key: string;
+      payload: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation };
+    }
+  | {
+      actionType: 'IS_VALID_MOLBLOCK';
+      key: string;
+      payload: { mdl: string };
+    }
+  | {
+      actionType: 'GET_QMOL_SMARTS';
+      key: string;
+      payload: { structure: string };
+    }
+  | {
+      actionType: 'REMOVE_HS';
+      key: string;
+      payload: { structure: string };
+    }
+  | {
+      actionType: 'ADD_HS';
+      key: string;
+      payload: { structure: string };
+    }
+  | {
+      actionType: 'GET_NEW_COORDS';
+      key: string;
+      payload: { structure: string; useCoordGen?: boolean };
     };
 
 export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {

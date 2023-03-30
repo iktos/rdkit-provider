@@ -31,14 +31,20 @@ import {
 } from './actions';
 import { initRdkit } from './utils/initRDKit';
 import {
+  addHs,
+  convertMolNotation,
   getCanonicalFormForStructure,
   getMatchingSubstructure,
   getMoleculeDetails,
+  getNewCoords,
+  getQMolSmarts,
   getSvg,
   getSvgFromSmarts,
   hasMatchingSubstructure,
+  isValidMolBlock,
   isValidSmarts,
   isValidSmiles,
+  removeHs,
 } from './utils/chem';
 
 addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
@@ -83,6 +89,36 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
     case RDKIT_WORKER_ACTIONS.GET_SUBSTRUCTURE_MATCH:
       responsePayload = getMatchingSubstructure(data.payload) satisfies PayloadResponseType<'GET_SUBSTRUCTURE_MATCH'>;
       break;
+    case RDKIT_WORKER_ACTIONS.IS_VALID_MOLBLOCK:
+      responsePayload = {
+        isValid: isValidMolBlock(data.payload.mdl),
+      } satisfies PayloadResponseType<'IS_VALID_MOLBLOCK'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.CONVERT_MOL_NOTATION:
+      responsePayload = {
+        structure: convertMolNotation(data.payload),
+      } satisfies PayloadResponseType<'CONVERT_MOL_NOTATION'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.GET_QMOL_SMARTS:
+      responsePayload = {
+        smarts: getQMolSmarts(data.payload.structure),
+      } satisfies PayloadResponseType<'GET_QMOL_SMARTS'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.ADD_HS:
+      responsePayload = {
+        mdl: addHs(data.payload.structure),
+      } satisfies PayloadResponseType<'ADD_HS'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.REMOVE_HS:
+      responsePayload = {
+        mdl: removeHs(data.payload.structure),
+      } satisfies PayloadResponseType<'REMOVE_HS'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.GET_NEW_COORDS:
+      responsePayload = {
+        mdl: getNewCoords(data.payload.structure, data.payload.useCoordGen),
+      } satisfies PayloadResponseType<'GET_NEW_COORDS'>;
+      break;
     case RDKIT_WORKER_ACTIONS.TERMINATE:
       cleanAllCache();
       self.close();
@@ -101,7 +137,7 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   | 'GET_SVG'
   | 'GET_SVG_FROM_SMARTS'
   ? { svg: string | null }
-  : ActionType extends 'IS_VALID_SMILES' | 'IS_VALID_SMARTS'
+  : ActionType extends 'IS_VALID_SMILES' | 'IS_VALID_SMARTS' | 'IS_VALID_MOLBLOCK'
   ? { isValid: boolean }
   : ActionType extends 'GET_CANONICAL_FORM_FOR_STRUCTURE'
   ? { canonicalForm: string | null }
@@ -114,4 +150,10 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
       numAtoms: number;
       numRings: number;
     } | null
+  : ActionType extends 'CONVERT_MOL_NOTATION'
+  ? { structure: string | null }
+  : ActionType extends 'GET_QMOL_SMARTS'
+  ? { smarts: string | null }
+  : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'
+  ? { mdl: string | null }
   : never;
