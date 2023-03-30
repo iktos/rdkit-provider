@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -24,7 +24,7 @@
 
 import { postWorkerJob } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
-import { AlignmentDetails, DrawingDetails } from '../worker/utils/chem';
+import { AlignmentDetails, DrawingDetails, MolNotation, SourceMolNotation } from '../worker/utils/chem';
 import { PayloadResponseType } from '../worker/worker';
 
 export const getSvg = (
@@ -112,4 +112,60 @@ export const getMatchingSubstructure = (
     key: key,
     payload: { structure, substructure },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_SUBSTRUCTURE_MATCH'>);
+};
+
+export const isValidMolBlock = (worker: Worker, { mdl }: { mdl: string }) => {
+  const key = mdl;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.IS_VALID_MOLBLOCK,
+    key,
+    payload: { mdl },
+  }).then((msg) => msg.payload as PayloadResponseType<'IS_VALID_MOLBLOCK'>);
+};
+
+export const convertMolNotation = (
+  worker: Worker,
+  {
+    moleculeString,
+    targetNotation,
+    sourceNotation,
+    useQMol,
+  }: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation; useQMol?: boolean },
+) => {
+  const key = `${moleculeString}_to_${targetNotation}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.CONVERT_MOL_NOTATION,
+    key,
+    payload: { moleculeString, targetNotation, sourceNotation, useQMol },
+  }).then((msg) => msg.payload as PayloadResponseType<'CONVERT_MOL_NOTATION'>);
+};
+
+export const removeHs = (worker: Worker, { structure }: { structure: string }) => {
+  const key = structure;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.REMOVE_HS,
+    key,
+    payload: { structure },
+  }).then((msg) => msg.payload as PayloadResponseType<'REMOVE_HS'>);
+};
+
+export const addHs = (worker: Worker, { structure }: { structure: string }) => {
+  const key = structure;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.ADD_HS,
+    key,
+    payload: { structure },
+  }).then((msg) => msg.payload as PayloadResponseType<'ADD_HS'>);
+};
+
+export const getNewCoords = (
+  worker: Worker,
+  { structure, useCoordGen }: { structure: string; useCoordGen?: boolean },
+) => {
+  const key = structure;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_NEW_COORDS,
+    key,
+    payload: { structure, useCoordGen },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_NEW_COORDS'>);
 };
