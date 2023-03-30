@@ -111,7 +111,12 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'CONVERT_MOL_NOTATION';
       key: string;
-      payload: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation };
+      payload: {
+        moleculeString: string;
+        targetNotation: MolNotation;
+        sourceNotation?: SourceMolNotation;
+        useQMol?: boolean;
+      };
     }
   | {
       actionType: 'IS_VALID_MOLBLOCK';

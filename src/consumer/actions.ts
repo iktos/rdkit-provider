@@ -129,13 +129,14 @@ export const convertMolNotation = (
     moleculeString,
     targetNotation,
     sourceNotation,
-  }: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation },
+    useQMol,
+  }: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation; useQMol?: boolean },
 ) => {
   const key = `${moleculeString}_to_${targetNotation}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.CONVERT_MOL_NOTATION,
     key,
-    payload: { moleculeString, targetNotation, sourceNotation },
+    payload: { moleculeString, targetNotation, sourceNotation, useQMol },
   }).then((msg) => msg.payload as PayloadResponseType<'CONVERT_MOL_NOTATION'>);
 };
 
