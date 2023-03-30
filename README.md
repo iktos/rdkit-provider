@@ -4,10 +4,10 @@ Initialises a web worker with `RDKitModule` instance from [@rdkit/rdkit](https:/
 
 ## Setup
 #### Assets
-The project using this package needs to provide it with [RDKit package assets](https://github.com/rdkit/rdkit/tree/master/Code/MinimalLib#using-the-rdkit-package-assets)
-
 After installing [@rdkit/rdkit](https://github.com/rdkit/rdkit-js) copy to your public folder
-`node_modules/@rdkit/rdkit/dist/RDKit_minimal.js` `node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm`
+`node_modules/@iktos-oss/rdkit-provider/lib/rdkit-worker.js`
+`node_modules/@rdkit/rdkit/dist/RDKit_minimal.js` 
+`node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm`
 
 ## Usage
 
@@ -39,22 +39,26 @@ Options that can be passed to  ```RDKitProvider ```:
 You can make use of a set of helper functions exposed by the package
 
 ```js
-import { useRDKitUtils } from '@iktos/rdkit-provider';
+import { useRDKitUtils, useRDKit } from '@iktos/rdkit-provider';
 
 const Component = () => {
+  const { worker } = useRDKit();
   const { isValidSmiles } = useRDKitUtils();
   const submit = useCallback(
     async (smiles) => {
-    const isValid = await isValidSmiles({smiles});
+    const { isValid } = await isValidSmiles({smiles});
       if (!isValid) return;
       // ...
     },
     [isValidSmiles],
   );
-
+  
+  if (!worker) return 'loading ...'
+  return <>
+    ...
+  </>
   //...
 };
 ```
-
 
 Example of usage can be found in [github.com/iktos/molecule-representation](github.com/iktos/molecule-representation)
