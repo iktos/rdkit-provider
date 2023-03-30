@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -28,7 +28,6 @@ import {
   convertMolNotation,
   getMoleculeDetails,
   getNewCoords,
-  getQMolSmarts,
   hasMatchingSubstructure,
   isValidMolBlock,
   isValidSmarts,
@@ -96,13 +95,6 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'REMOVE_HS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return removeHs(worker, params);
-      },
-      [worker],
-    ),
-    getQMolSmarts: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'GET_QMOL_SMARTS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getQMolSmarts(worker, params);
       },
       [worker],
     ),

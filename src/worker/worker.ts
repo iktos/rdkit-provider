@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -37,7 +37,6 @@ import {
   getMatchingSubstructure,
   getMoleculeDetails,
   getNewCoords,
-  getQMolSmarts,
   getSvg,
   getSvgFromSmarts,
   hasMatchingSubstructure,
@@ -99,11 +98,6 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
         structure: convertMolNotation(data.payload),
       } satisfies PayloadResponseType<'CONVERT_MOL_NOTATION'>;
       break;
-    case RDKIT_WORKER_ACTIONS.GET_QMOL_SMARTS:
-      responsePayload = {
-        smarts: getQMolSmarts(data.payload.structure),
-      } satisfies PayloadResponseType<'GET_QMOL_SMARTS'>;
-      break;
     case RDKIT_WORKER_ACTIONS.ADD_HS:
       responsePayload = {
         mdl: addHs(data.payload.structure),
@@ -152,8 +146,6 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
     } | null
   : ActionType extends 'CONVERT_MOL_NOTATION'
   ? { structure: string | null }
-  : ActionType extends 'GET_QMOL_SMARTS'
-  ? { smarts: string | null }
   : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'
   ? { mdl: string | null }
   : never;

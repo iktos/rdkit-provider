@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -40,7 +40,6 @@ export const RDKIT_WORKER_ACTIONS = {
   TERMINATE: 'TERMINATE',
   CONVERT_MOL_NOTATION: 'CONVERT_MOL_NOTATION',
   IS_VALID_MOLBLOCK: 'IS_VALID_MOLBLOCK',
-  GET_QMOL_SMARTS: 'GET_QMOL_SMARTS',
   REMOVE_HS: 'REMOVE_HS',
   ADD_HS: 'ADD_HS',
   GET_NEW_COORDS: 'GET_NEW_COORDS',
@@ -118,11 +117,6 @@ export type WorkerMessageNarrower =
       actionType: 'IS_VALID_MOLBLOCK';
       key: string;
       payload: { mdl: string };
-    }
-  | {
-      actionType: 'GET_QMOL_SMARTS';
-      key: string;
-      payload: { structure: string };
     }
   | {
       actionType: 'REMOVE_HS';

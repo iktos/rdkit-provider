@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -137,15 +137,6 @@ export const convertMolNotation = (
     key,
     payload: { moleculeString, targetNotation, sourceNotation },
   }).then((msg) => msg.payload as PayloadResponseType<'CONVERT_MOL_NOTATION'>);
-};
-
-export const getQMolSmarts = (worker: Worker, { structure }: { structure: string }) => {
-  const key = structure;
-  return postWorkerJob(worker, {
-    actionType: RDKIT_WORKER_ACTIONS.GET_QMOL_SMARTS,
-    key,
-    payload: { structure },
-  }).then((msg) => msg.payload as PayloadResponseType<'GET_QMOL_SMARTS'>);
 };
 
 export const removeHs = (worker: Worker, { structure }: { structure: string }) => {

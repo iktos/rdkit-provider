@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -146,37 +146,27 @@ export const isValidMolBlock = (mdl: string) => {
 };
 
 /**
- * Convert a molecule structure to smarts using query molecule (qmol)
- * @param structure Molecule structure, can be SMILES or molblock
- * @returns Smarts string
- */
-export const getQMolSmarts = (structure: string): string => {
-  let qmol;
-  try {
-    qmol = globalThis.workerRDKit.get_qmol(structure);
-    return qmol.get_smarts();
-  } finally {
-    qmol?.delete();
-  }
-};
-
-/**
  * Convert molecule structure to given notation (smiles, smarts, molblock, ...)
+ * TODO some notations like inchi don't work with qmol
  */
 export const convertMolNotation = ({
   moleculeString,
   targetNotation,
   sourceNotation,
+  useQMol = false,
 }: {
   moleculeString: string;
   targetNotation: MolNotation;
   sourceNotation?: SourceMolNotation;
+  useQMol?: boolean;
 }): string | null => {
   if (sourceNotation != null) {
     if (sourceNotation === targetNotation) throw new Error('Source and target notations must differ');
     if (!_validateSource(moleculeString, sourceNotation)) throw new Error('Molecule string not valid');
   }
-  const mol = get_molecule(moleculeString, globalThis.workerRDKit);
+  const mol = useQMol
+    ? globalThis.workerRDKit.get_qmol(moleculeString)
+    : get_molecule(moleculeString, globalThis.workerRDKit);
   if (!mol) return null;
   try {
     return mol[`get_${targetNotation}`]();
@@ -184,7 +174,7 @@ export const convertMolNotation = ({
     console.error(e);
     throw new Error('Target notation not implemented');
   } finally {
-    release_molecule(mol);
+    useQMol ? mol?.delete() : release_molecule(mol);
   }
 };
 
