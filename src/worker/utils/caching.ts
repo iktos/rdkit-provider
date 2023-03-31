@@ -29,15 +29,13 @@ export const storeJSMolInCache = (smiles: string, mol: JSMol) => {
   const nbCachedMolecules = Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length;
   if (nbCachedMolecules > globalThis.rdkitWorkerGlobals.maxJsMolsCached) {
     cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [smiles]: mol };
-    return;
   }
   try {
-    globalThis.rdkitWorkerGlobals.jsMolCache[smiles] = mol;
+    globalThis.rdkitWorkerGlobals.jsMolCache.set(smiles, mol);
   } catch (e) {
     console.error(e);
     cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [smiles]: mol };
+    globalThis.rdkitWorkerGlobals.jsMolCache.set(smiles, mol);
   }
 };
 
@@ -45,15 +43,15 @@ export const getJSMolFromCache = (smiles: string) => {
   if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled || !globalThis.rdkitWorkerGlobals.jsMolCache) {
     return null;
   }
-  return globalThis.rdkitWorkerGlobals.jsMolCache[smiles];
+  return globalThis.rdkitWorkerGlobals.jsMolCache.get(smiles);
 };
 
 export const cleanJSMolCache = () => {
   if (!globalThis.rdkitWorkerGlobals?.jsMolCache) return;
-  for (const [smiles, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
+  for (const [smiles, mol] of globalThis.rdkitWorkerGlobals.jsMolCache.entries()) {
     try {
       mol.delete();
-      delete globalThis.rdkitWorkerGlobals.jsMolCache[smiles];
+      globalThis.rdkitWorkerGlobals.jsMolCache.delete(smiles);
     } catch {
       // multiple cleanJSMolCache could be called in the same time, => avoid calling delete on the same mol
     }

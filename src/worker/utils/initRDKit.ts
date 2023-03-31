@@ -43,7 +43,7 @@ const initWorkerCache = (cache: RDKitProviderCacheOptions) => {
   if (enableJsMolCaching) {
     globalThis.rdkitWorkerGlobals = {
       jsMolCacheEnabled: !!enableJsMolCaching,
-      jsMolCache: enableJsMolCaching ? {} : null,
+      jsMolCache: enableJsMolCaching ? new Map() : null,
       maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
     };
   }
