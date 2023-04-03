@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -30,6 +30,8 @@ export const initRdkit = async ({ rdkitPath, preferCoordgen, cache = {} }: InitW
     initWorkerCache(cache);
   }
 
+  if (globalThis.workerRDKit) return;
+
   const path = rdkitPath || '/RDKit_minimal.js';
   const url = new URL(path, globalThis.origin);
   //@ts-ignore
@@ -38,6 +40,7 @@ export const initRdkit = async ({ rdkitPath, preferCoordgen, cache = {} }: InitW
   await globalThis.initRDKitModule().then((rdkitModule) => {
     globalThis.workerRDKit = rdkitModule;
   });
+  //@ts-ignore
   globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
 };
 
