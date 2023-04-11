@@ -24,7 +24,7 @@
 
 import { postWorkerJob } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
-import { AlignmentDetails } from '../worker/utils/chem';
+import { AlignmentDetails, DrawingDetails } from '../worker/utils/chem';
 import { PayloadResponseType } from '../worker/worker';
 
 export const getSvg = (
@@ -33,7 +33,7 @@ export const getSvg = (
     smiles,
     drawingDetails,
     alignmentDetails,
-  }: { smiles: string; drawingDetails?: Record<string, unknown>; alignmentDetails?: AlignmentDetails },
+  }: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails },
 ) => {
   const key = `${smiles}-${drawingDetails}`;
   return postWorkerJob(worker, {

@@ -22,6 +22,7 @@
   SOFTWARE.
 */
 
+import { RDKitColor } from '../types';
 import { get_molecule, release_molecule } from './molecule';
 
 export const getSvg = ({
@@ -30,7 +31,7 @@ export const getSvg = ({
   alignmentDetails,
 }: {
   smiles: string;
-  drawingDetails?: Record<string, unknown>;
+  drawingDetails?: DrawingDetails;
   alignmentDetails?: AlignmentDetails;
 }) => {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
@@ -139,4 +140,21 @@ export interface AlignmentDetails {
   molBlock: string;
   highlightColor?: RDKitColor;
 }
-type RDKitColor = number[];
+export interface DrawingDetails {
+  width: number;
+  height: number;
+  bondLineWidth?: number;
+  backgroundColour?: RDKitColor;
+  highlightColour?: RDKitColor;
+  highlightRadius?: number;
+  fixedBondLength?: number;
+  addAtomIndices?: boolean;
+  // highlight atoms indicies
+  atoms?: number[];
+  // highlight bonds indicies
+  bonds?: number[];
+  highlightAtomColors?: Record<number, RDKitColor>;
+  highlightBondColors?: Record<number, RDKitColor>;
+  // rest of RDKit drawing options
+  [key: string]: unknown;
+}
