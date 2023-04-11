@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-import { RDKitColor } from '../types';
+import { RDKitColor } from '../../types';
 import { get_molecule, release_molecule } from './molecule';
 
 export const getSvg = ({
@@ -155,6 +155,4 @@ export interface DrawingDetails {
   bonds?: number[];
   highlightAtomColors?: Record<number, RDKitColor>;
   highlightBondColors?: Record<number, RDKitColor>;
-  // rest of RDKit drawing options
-  [key: string]: unknown;
 }
