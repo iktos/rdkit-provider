@@ -23,7 +23,7 @@
 */
 
 import { RDKitProviderCacheOptions } from '../contexts';
-import { AlignmentDetails } from './utils/chem';
+import { AlignmentDetails, DrawingDetails } from './utils/chem';
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
@@ -62,7 +62,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_SVG';
       key: string;
-      payload: { smiles: string; drawingDetails?: Record<string, unknown>; alignmentDetails?: AlignmentDetails };
+      payload: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails };
     }
   | {
       actionType: 'GET_SVG_FROM_SMARTS';

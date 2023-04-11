@@ -29,3 +29,5 @@ export interface RDKitWorkerGlobals {
   jsMolCache: Record<string, JSMol> | null;
   maxJsMolsCached: number;
 }
+
+export type RDKitColor = [number, number, number] | [number, number, number, number];
