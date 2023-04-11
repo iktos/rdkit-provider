@@ -33,7 +33,7 @@ export const getSvg = (
     smiles,
     drawingDetails,
     alignmentDetails,
-  }: { smiles: string; drawingDetails: string; alignmentDetails?: AlignmentDetails },
+  }: { smiles: string; drawingDetails?: Record<string, unknown>; alignmentDetails?: AlignmentDetails },
 ) => {
   const key = `${smiles}-${drawingDetails}`;
   return postWorkerJob(worker, {

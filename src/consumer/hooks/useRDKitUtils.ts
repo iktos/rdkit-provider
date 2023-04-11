@@ -23,7 +23,7 @@
 */
 
 import { useCallback } from 'react';
-import { getMoleculeDetails, hasMatchingSubstructure, isValidSmarts, isValidSmiles } from '..';
+import { getMoleculeDetails, getSvg, hasMatchingSubstructure, isValidSmarts, isValidSmiles } from '..';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
 import { useRDKit } from '../../hooks/useRDKit';
@@ -57,6 +57,13 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_MOLECULE_DETAILS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getMoleculeDetails(worker, params);
+      },
+      [worker],
+    ),
+    getSvg: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_SVG'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getSvg(worker, params);
       },
       [worker],
     ),
