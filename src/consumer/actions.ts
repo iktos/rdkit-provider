@@ -35,7 +35,7 @@ export const getSvg = (
     alignmentDetails,
   }: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails },
 ) => {
-  const key = `${smiles}-${drawingDetails}`;
+  const key = `${smiles}-${JSON.stringify(drawingDetails)}-${JSON.stringify(alignmentDetails)}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_SVG,
     key: key,
