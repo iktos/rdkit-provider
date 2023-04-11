@@ -62,7 +62,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_SVG';
       key: string;
-      payload: { smiles: string; drawingDetails: string; alignmentDetails?: AlignmentDetails };
+      payload: { smiles: string; drawingDetails?: Record<string, unknown>; alignmentDetails?: AlignmentDetails };
     }
   | {
       actionType: 'GET_SVG_FROM_SMARTS';

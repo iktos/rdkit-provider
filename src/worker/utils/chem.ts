@@ -30,7 +30,7 @@ export const getSvg = ({
   alignmentDetails,
 }: {
   smiles: string;
-  drawingDetails: string;
+  drawingDetails?: Record<string, unknown>;
   alignmentDetails?: AlignmentDetails;
 }) => {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
@@ -41,7 +41,8 @@ export const getSvg = ({
     mol.generate_aligned_coords(molToAlignWith, true);
     release_molecule(molToAlignWith);
   }
-  const svg = mol.get_svg_with_highlights(drawingDetails);
+  const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
+  const svg = mol.get_svg_with_highlights(drawingDetailsStringifyed);
   if (alignmentDetails) {
     // reset coords as mol could be in cache
     mol.set_new_coords();
