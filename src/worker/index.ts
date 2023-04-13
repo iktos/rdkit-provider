@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -24,3 +24,4 @@
 
 export * from './instanciate';
 export * from './utils';
+export { RDKIT_WORKER_ACTIONS } from './actions';
