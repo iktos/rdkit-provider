@@ -249,7 +249,6 @@ export interface DrawingDetails {
   highlightAtomColors?: Record<number, RDKitColor>;
   highlightBondColors?: Record<number, RDKitColor>;
 }
-type RDKitColor = number[];
 
 // TODO use enum or other
 export type MolNotation =
