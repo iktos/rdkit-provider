@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -26,3 +26,4 @@ export * from './contexts';
 export * from './hooks';
 export * from './consumer';
 export * from './types';
+export * from './worker';
