@@ -33,7 +33,8 @@ Options that can be passed to  ```RDKitProvider ```:
 | prop  | type | functionality | required/optional |
 | ------------- | ------------- | ------------- | ------------- |
 | cache  | ```RDKitProviderCacheOptions = { enableJsMolCaching?: boolean; maxJsMolsCached?: number; }```  | enables ```JSMol``` caching for better performance | optional  |
-| preferCoordgen  | ```boolean```  | will be passed to [@rdkit/rdkitjs prefer_coordgen](https://docs.rdkitjs.com/interfaces/RDKitModule.html#prefer_coordgen.prefer_coordgen-1) to use Schrodinger’s open-source Coordgen library to generate 2D coordinates of molecules | optional  |    
+| preferCoordgen  | ```boolean```  | will be passed to [@rdkit/rdkitjs prefer_coordgen](https://docs.rdkitjs.com/interfaces/RDKitModule.html#prefer_coordgen.prefer_coordgen-1) to use Schrodinger’s open-source Coordgen library to generate 2D coordinates of molecules | optional  |  
+| removeHs  | ```boolean```  |  toggles removing hydrogens molecules. Defaults to true | optional  |  
 | ```initialRdkitInstance```  | ```RDKitModule``` from ```@rdkit/rdkitjs``` | pass an instance of to expose by the context `RDKitModule`, if not passed rdkit-provider creates one for you  | optional  |
 
 You can make use of a set of helper functions exposed by the package
