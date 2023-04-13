@@ -57,7 +57,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'INIT_RDKIT_MODULE';
       key: string;
-      payload: { cache: RDKitProviderCacheOptions; preferCoordgen: boolean };
+      payload: { cache: RDKitProviderCacheOptions; preferCoordgen: boolean; removeHs: boolean };
     }
   | {
       actionType: 'GET_SVG';

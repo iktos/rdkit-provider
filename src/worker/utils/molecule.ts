@@ -30,7 +30,8 @@ const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
   if (cachedMolecule) return cachedMolecule;
   if (!smiles) return null;
   if (!RDKit) return null;
-  const mol = RDKit.get_mol(smiles);
+  const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
+  const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
   storeJSMolInCache(smiles, mol);
   return mol;
 };
