@@ -26,7 +26,7 @@ import { JSMol } from '@rdkit/rdkit';
 
 export interface RDKitWorkerGlobals {
   jsMolCacheEnabled: boolean;
-  jsMolCache: Record<string, JSMol> | null;
+  jsMolCache: Map<string, JSMol> | null;
   maxJsMolsCached: number;
   removeHs: boolean;
 }
