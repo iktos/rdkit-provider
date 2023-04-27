@@ -9,7 +9,7 @@ Initialises a web worker with `RDKitModule` instance from [@rdkit/rdkit](https:/
 The project using this package needs to provide it with [RDKit package assets](https://github.com/rdkit/rdkit/tree/master/Code/MinimalLib#using-the-rdkit-package-assets)
 
 After installing [@rdkit/rdkit](https://github.com/rdkit/rdkit-js) copy to your public folder
-`node_modules/@iktos-oss/rdkit-provider/lib/rdkit-worker.js`
+`node_modules/@iktos-oss/rdkit-provider/lib/rdkit-worker*.js`
 `node_modules/@rdkit/rdkit/dist/RDKit_minimal.js`
 `node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm`
 
