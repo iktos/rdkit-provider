@@ -1,6 +1,6 @@
 {
   "name": "@iktos-oss/rdkit-provider",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "exports an initialized RDKit instance, with helper functions",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -24,7 +24,7 @@
     "build": "rm -rf lib/ && npm run build:esm && npm run build:cjs && npm run bundle:worker",
     "build:esm": "tsc -p tsconfig.no-worker.json",
     "build:cjs": "tsc -p tsconfig.no-worker.json --module CommonJS --outDir lib/cjs",
-    "bundle:worker": "rm -rf worker-lib/ && webpack --mode production --config worker.config.js && cp ./worker-lib/rdkit-worker.js ./lib && rm -R worker-lib",
+    "bundle:worker": "rm -rf worker-lib/ && webpack --mode production --config worker.config.js && cp ./worker-lib/rdkit-worker-2.3.1.js ./lib && rm -R worker-lib",
     "test": "exit 0",
     "lint-check": "npx eslint --max-warnings 0 \"src/**/*.@(tsx|ts|jsx|js)\"",
     "style-check": "npx prettier --list-different \"src/**/*.@(tsx|ts|jsx|js)\"",
