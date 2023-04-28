@@ -1,6 +1,6 @@
 {
   "name": "@iktos-oss/rdkit-provider",
-  "version": "2.4.0",
+  "version": "2.4.0-beta0",
   "description": "exports an initialized RDKit instance, with helper functions",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -13,7 +13,8 @@
     "react",
     "rdkit",
     "wasm",
-    "cheminformatics"
+    "cheminformatics",
+    "webworker"
   ],
   "repository": {
     "type": "git",
