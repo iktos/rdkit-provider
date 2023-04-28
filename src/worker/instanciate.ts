@@ -25,8 +25,8 @@
 import { broadcastLocalResponse } from './utils/broadcast';
 import { version } from '../../package.json';
 
-export const initWorker = (rdkitWorkerPath?: string) => {
-  const path = rdkitWorkerPath || `/rdkit-worker-${version}.js`;
+export const initWorker = (rdkitWorkerPublicFolder = '') => {
+  const path = `${rdkitWorkerPublicFolder}/rdkit-worker-${version}.js`;
   const worker = new Worker(new URL(path, globalThis.origin));
   worker.onmessage = broadcastLocalResponse;
   return worker;
