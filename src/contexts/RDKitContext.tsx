@@ -37,7 +37,7 @@ export type RDKitProviderProps = PropsWithChildren<{
   preferCoordgen?: boolean;
   removeHs?: boolean;
   rdkitPath?: string;
-  rdkitWorkerPath?: string;
+  rdkitWorkerPublicFolder?: string;
 }>;
 
 // force default context to be undefined, to check if package users have wrapped it with the required provider
@@ -50,7 +50,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   preferCoordgen = false,
   removeHs = true,
   rdkitPath,
-  rdkitWorkerPath,
+  rdkitWorkerPublicFolder,
   children,
 }) => {
   const [worker, setWorker] = useState<Worker | null>(null);
@@ -60,7 +60,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
     let workerInstance: Worker | null = initialWorkerInstance;
 
     const initialise = async () => {
-      if (!workerInstance) workerInstance = initWorker(rdkitWorkerPath);
+      if (!workerInstance) workerInstance = initWorker(rdkitWorkerPublicFolder);
 
       // await rdkit module init in worker before starting using the worker
       await postWorkerJob(workerInstance, {
@@ -84,7 +84,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         key: 'worker-terminate',
       });
     };
-  }, [initialWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPath, removeHs]);
+  }, [initialWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPublicFolder, removeHs]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
