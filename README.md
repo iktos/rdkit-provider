@@ -67,4 +67,4 @@ const Component = () => {
 };
 ```
 
-Example of usage can be found in [github.com/iktos/molecule-representation](github.com/iktos/molecule-representation)
+Example of usage can be found in [github.com/iktos/molecule-representation](https://github.com/iktos/molecule-representation)
