@@ -45,7 +45,7 @@ export type RDKitProviderProps = PropsWithChildren<{
 export const RDKitContext = React.createContext<RDKitContextValue>(undefined as any);
 
 export const RDKitProvider: React.FC<RDKitProviderProps> = ({
-  cache = {},
+  cache,
   initialWorkerInstance = null,
   preferCoordgen = false,
   removeHs = true,
