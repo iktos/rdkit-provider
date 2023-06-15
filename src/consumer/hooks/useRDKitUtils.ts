@@ -34,7 +34,7 @@ import {
   isValidSmarts,
   isValidSmiles,
   removeHs,
-} from '..';
+} from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
 import { useRDKit } from '../../hooks/useRDKit';
