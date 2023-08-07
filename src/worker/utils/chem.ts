@@ -23,7 +23,7 @@
 */
 
 import { RDKitColor } from '../../types';
-import { get_molecule, get_query_molecule, release_molecule } from './molecule';
+import { get_molecule, release_molecule } from './molecule';
 
 export const getSvg = ({
   smiles,
@@ -70,9 +70,21 @@ export const getMoleculeDetails = (smiles: string) => {
   };
 };
 
-export const getCanonicalFormForStructure = (structure: string): string | null => {
-  if (isValidSmiles(structure)) return getCanonicalSmiles(structure);
-  return getCanonicalSmarts(structure);
+export const getCanonicalFormForStructure = ({
+  structure,
+  molNotation = 'smiles',
+  useQMol = false,
+}: {
+  structure: string;
+  molNotation?: MolNotation;
+  useQMol?: boolean;
+}): string | null => {
+  return convertMolNotation({
+    moleculeString: structure,
+    targetNotation: molNotation,
+    sourceNotation: undefined,
+    useQMol,
+  });
 };
 
 export const isValidSmiles = (smiles: string): boolean => {
@@ -94,20 +106,20 @@ export const isValidSmarts = (smarts: string): boolean => {
   return isValid;
 };
 
-const getCanonicalSmiles = (smiles: string): string | null => {
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
-  if (!mol) return null;
-  const cannonicalSmiles = mol.get_smiles();
-  release_molecule(mol);
-  return cannonicalSmiles;
-};
-const getCanonicalSmarts = (smarts: string): string | null => {
-  const qmol = get_query_molecule(smarts, globalThis.workerRDKit);
-  if (!qmol) return null;
-  const canonicalSmarts = qmol.get_smarts();
-  release_molecule(qmol);
-  return canonicalSmarts;
-};
+// const getCanonicalSmiles = (smiles: string): string | null => {
+//   const mol = get_molecule(smiles, globalThis.workerRDKit);
+//   if (!mol) return null;
+//   const cannonicalSmiles = mol.get_smiles();
+//   release_molecule(mol);
+//   return cannonicalSmiles;
+// };
+// const getCanonicalSmarts = (smarts: string): string | null => {
+//   const qmol = get_query_molecule(smarts, globalThis.workerRDKit);
+//   if (!qmol) return null;
+//   const canonicalSmarts = qmol.get_smarts();
+//   release_molecule(qmol);
+//   return canonicalSmarts;
+// };
 
 export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
   const smilesMol = get_molecule(smiles, globalThis.workerRDKit);

@@ -82,7 +82,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_CANONICAL_FORM_FOR_STRUCTURE';
       key: string;
-      payload: { structure: string };
+      payload: { structure: string; molNotation?: MolNotation; useQMol?: boolean };
     }
   | {
       actionType: 'IS_VALID_SMILES';
