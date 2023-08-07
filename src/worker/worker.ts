@@ -57,7 +57,7 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       break;
     case RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE:
       responsePayload = {
-        canonicalForm: getCanonicalFormForStructure(data.payload.structure),
+        canonicalForm: getCanonicalFormForStructure(data.payload),
       } satisfies PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>;
       break;
     case RDKIT_WORKER_ACTIONS.GET_SVG:
