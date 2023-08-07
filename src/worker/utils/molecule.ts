@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -44,6 +44,26 @@ export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
     console.error(e);
     cleanJSMolCache();
     return get_molecule_memory_unsafe(smiles, RDKit);
+  }
+};
+
+export const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule) => {
+  const cachedQMolecule = getJSMolFromCache(structure);
+  if (cachedQMolecule) return cachedQMolecule;
+  if (!structure) return null;
+  if (!RDKit) return null;
+  const qmol = RDKit.get_qmol(structure);
+  storeJSMolInCache(structure, qmol);
+  return qmol;
+};
+
+export const get_query_molecule = (structure: string, RDKit: RDKitModule) => {
+  try {
+    return get_query_molecule_memory_unsafe(structure, RDKit);
+  } catch (e) {
+    console.error(e);
+    cleanJSMolCache();
+    return get_query_molecule_memory_unsafe(structure, RDKit);
   }
 };
 

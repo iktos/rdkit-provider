@@ -23,7 +23,7 @@
 */
 
 import { RDKitColor } from '../../types';
-import { get_molecule, release_molecule } from './molecule';
+import { get_molecule, get_query_molecule, release_molecule } from './molecule';
 
 export const getSvg = ({
   smiles,
@@ -102,11 +102,11 @@ const getCanonicalSmiles = (smiles: string): string | null => {
   return cannonicalSmiles;
 };
 const getCanonicalSmarts = (smarts: string): string | null => {
-  const mol = get_molecule(smarts, globalThis.workerRDKit);
-  if (!mol) return null;
-  const canoncialSmarts = mol.get_smarts();
-  release_molecule(mol);
-  return canoncialSmarts;
+  const qmol = get_query_molecule(smarts, globalThis.workerRDKit);
+  if (!qmol) return null;
+  const canonicalSmarts = qmol.get_smarts();
+  release_molecule(qmol);
+  return canonicalSmarts;
 };
 
 export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
