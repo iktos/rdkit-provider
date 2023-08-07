@@ -64,12 +64,15 @@ export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string 
   }).then((msg) => msg.payload as PayloadResponseType<'GET_MOLECULE_DETAILS'>);
 };
 
-export const getCanonicalFormForStructure = (worker: Worker, { structure }: { structure: string }) => {
+export const getCanonicalFormForStructure = (
+  worker: Worker,
+  { structure, molNotation, useQMol }: { structure: string; molNotation?: MolNotation; useQMol?: boolean },
+) => {
   const key = structure;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE,
     key: key,
-    payload: { structure },
+    payload: { structure, molNotation, useQMol },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>);
 };
 

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -24,36 +24,41 @@
 
 import { JSMol } from '@rdkit/rdkit';
 
-export const storeJSMolInCache = (smiles: string, mol: JSMol) => {
+/**
+ * Store JSMol object in global jsMolCache
+ * @param structure can be a smiles, smarts or molblock...
+ * @param jsMol can be a mol or qmol
+ */
+export const storeJSMolInCache = (structure: string, jsMol: JSMol) => {
   if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled || !globalThis.rdkitWorkerGlobals.jsMolCache) return;
   const nbCachedMolecules = Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length;
   if (nbCachedMolecules > globalThis.rdkitWorkerGlobals.maxJsMolsCached) {
     cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [smiles]: mol };
+    globalThis.rdkitWorkerGlobals.jsMolCache = { [structure]: jsMol };
     return;
   }
   try {
-    globalThis.rdkitWorkerGlobals.jsMolCache[smiles] = mol;
+    globalThis.rdkitWorkerGlobals.jsMolCache[structure] = jsMol;
   } catch (e) {
     console.error(e);
     cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [smiles]: mol };
+    globalThis.rdkitWorkerGlobals.jsMolCache = { [structure]: jsMol };
   }
 };
 
-export const getJSMolFromCache = (smiles: string) => {
+export const getJSMolFromCache = (structure: string) => {
   if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled || !globalThis.rdkitWorkerGlobals.jsMolCache) {
     return null;
   }
-  return globalThis.rdkitWorkerGlobals.jsMolCache[smiles];
+  return globalThis.rdkitWorkerGlobals.jsMolCache[structure];
 };
 
 export const cleanJSMolCache = () => {
   if (!globalThis.rdkitWorkerGlobals?.jsMolCache) return;
-  for (const [smiles, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
+  for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
     try {
       mol.delete();
-      delete globalThis.rdkitWorkerGlobals.jsMolCache[smiles];
+      delete globalThis.rdkitWorkerGlobals.jsMolCache[structure];
     } catch {
       // multiple cleanJSMolCache could be called in the same time, => avoid calling delete on the same mol
     }
