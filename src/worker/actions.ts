@@ -43,6 +43,7 @@ export const RDKIT_WORKER_ACTIONS = {
   REMOVE_HS: 'REMOVE_HS',
   ADD_HS: 'ADD_HS',
   GET_NEW_COORDS: 'GET_NEW_COORDS',
+  GET_STEREO_TAGS: 'GET_STEREO_TAGS',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -137,6 +138,11 @@ export type WorkerMessageNarrower =
       actionType: 'GET_NEW_COORDS';
       key: string;
       payload: { structure: string; useCoordGen?: boolean };
+    }
+  | {
+      actionType: 'GET_STEREO_TAGS';
+      key: string;
+      payload: { structure: string };
     };
 
 export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {

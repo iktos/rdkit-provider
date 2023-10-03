@@ -25,6 +25,8 @@
 import { RDKitColor } from '../../types';
 import { get_molecule, get_query_molecule, release_molecule } from './molecule';
 
+import { CIPAtoms, CIPBonds } from '../types';
+
 export const getSvg = ({
   smiles,
   drawingDetails,
@@ -210,6 +212,26 @@ export const addHs = (structure: string) => {
     mdl = getNewCoords(mdl, false);
 
     return mdl;
+  } finally {
+    release_molecule(mol);
+  }
+};
+
+export const getStereoTags = (structure: string) => {
+  const mol = get_molecule(structure, globalThis.workerRDKit);
+  if (!mol) throw new Error('@iktos-oss/rdkit-provider: mol is null');
+
+  try {
+    const stereoTags = mol.get_stereo_tags();
+    const { CIP_atoms, CIP_bonds }: { CIP_atoms: CIPAtoms; CIP_bonds: CIPBonds } = JSON.parse(stereoTags);
+
+    return {
+      CIP_atoms,
+      CIP_bonds,
+    };
+  } catch (e) {
+    console.error(e);
+    throw new Error('@iktos-oss/rdkit-provider: could not get stereo tags');
   } finally {
     release_molecule(mol);
   }

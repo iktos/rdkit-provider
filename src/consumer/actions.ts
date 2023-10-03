@@ -172,3 +172,12 @@ export const getNewCoords = (
     payload: { structure, useCoordGen },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_NEW_COORDS'>);
 };
+
+export const getStereoTags = (worker: Worker, { structure }: { structure: string }) => {
+  const key = structure;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_STEREO_TAGS,
+    key,
+    payload: { structure },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_STEREO_TAGS'>);
+};

@@ -1,4 +1,4 @@
-﻿/* 
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -30,3 +30,6 @@ export interface RDKitWorkerGlobals {
   maxJsMolsCached: number;
   removeHs: boolean;
 }
+
+export type CIPAtoms = [idx: number, cip: string][];
+export type CIPBonds = [beginAtomIdx: number, endAtomIdx: number, cip: string][];
