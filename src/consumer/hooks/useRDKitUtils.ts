@@ -34,6 +34,7 @@ import {
   isValidSmarts,
   isValidSmiles,
   removeHs,
+  getStereoTags,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -110,6 +111,13 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_NEW_COORDS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getNewCoords(worker, params);
+      },
+      [worker],
+    ),
+    getStereoTags: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_STEREO_TAGS'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getStereoTags(worker, params);
       },
       [worker],
     ),

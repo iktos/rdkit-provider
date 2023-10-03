@@ -44,7 +44,9 @@ import {
   isValidSmarts,
   isValidSmiles,
   removeHs,
+  getStereoTags,
 } from './utils/chem';
+import { CIPAtoms, CIPBonds } from './types';
 
 addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   let responsePayload;
@@ -113,6 +115,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
         mdl: getNewCoords(data.payload.structure, data.payload.useCoordGen),
       } satisfies PayloadResponseType<'GET_NEW_COORDS'>;
       break;
+    case RDKIT_WORKER_ACTIONS.GET_STEREO_TAGS:
+      responsePayload = {
+        ...getStereoTags(data.payload.structure),
+      } satisfies PayloadResponseType<'GET_STEREO_TAGS'>;
+      break;
     case RDKIT_WORKER_ACTIONS.TERMINATE:
       cleanAllCache();
       self.close();
@@ -148,4 +155,6 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? { structure: string | null }
   : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'
   ? { mdl: string | null }
+  : ActionType extends 'GET_STEREO_TAGS'
+  ? { CIPAtoms: CIPAtoms; CIPBonds: CIPBonds }
   : never;
