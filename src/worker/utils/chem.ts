@@ -23,7 +23,7 @@
 */
 
 import { RDKitColor } from '../../types';
-import { get_molecule, get_query_molecule, release_molecule } from './molecule';
+import { get_molecule, get_query_molecule, get_reaction, release_molecule } from './molecule';
 
 import { CIPAtoms, CIPBonds } from '../types';
 
@@ -64,6 +64,19 @@ export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; wi
   release_molecule(smartsMol);
   return svg;
 };
+
+export const getSvgFromReaction = ({
+  reaction,
+  drawingDetails = {},
+}: {
+  reaction: string;
+  drawingDetails?: ReactionDrawingDetails;
+}) => {
+  const rxn = get_reaction(reaction, workerRDKit);
+  if (!rxn) return null;
+  const svg: string = rxn.get_svg_with_highlights(JSON.stringify(drawingDetails));
+  rxn.delete();
+
   return svg;
 };
 
@@ -269,6 +282,14 @@ export interface DrawingDetails {
   bonds?: number[];
   highlightAtomColors?: Record<number, RDKitColor>;
   highlightBondColors?: Record<number, RDKitColor>;
+}
+
+export interface ReactionDrawingDetails extends DrawingDetails {
+  // Default to true
+  kekulize?: boolean;
+  // Default to false
+  highlightByReactant?: boolean;
+  highlightColorsReactants?: RDKitColor[];
 }
 
 export type MolNotation =

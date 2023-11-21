@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -45,6 +45,7 @@ import {
   isValidSmiles,
   removeHs,
   getStereoTags,
+  getSvgFromReaction,
 } from './utils/chem';
 import { CIPAtoms, CIPBonds } from './types';
 
@@ -120,6 +121,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
         ...getStereoTags(data.payload.structure),
       } satisfies PayloadResponseType<'GET_STEREO_TAGS'>;
       break;
+    case RDKIT_WORKER_ACTIONS.GET_REACTION_SVG:
+      responsePayload = {
+        svg: getSvgFromReaction(data.payload),
+      } satisfies PayloadResponseType<'GET_REACTION_SVG'>;
+      break;
     case RDKIT_WORKER_ACTIONS.TERMINATE:
       cleanAllCache();
       self.close();
@@ -157,4 +163,6 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? { mdl: string | null }
   : ActionType extends 'GET_STEREO_TAGS'
   ? { CIP_atoms: CIPAtoms; CIP_bonds: CIPBonds }
+  : ActionType extends 'GET_REACTION_SVG'
+  ? { svg: string | null }
   : never;

@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -35,6 +35,7 @@ import {
   isValidSmiles,
   removeHs,
   getStereoTags,
+  getReactionSvg,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -118,6 +119,13 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_STEREO_TAGS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getStereoTags(worker, params);
+      },
+      [worker],
+    ),
+    getReactionSvg: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_REACTION_SVG'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getReactionSvg(worker, params);
       },
       [worker],
     ),

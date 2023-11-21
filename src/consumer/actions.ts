@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -24,7 +24,11 @@
 
 import { postWorkerJob } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
-import { AlignmentDetails, DrawingDetails, MolNotation, SourceMolNotation } from '../worker/utils/chem';
+  AlignmentDetails,
+  DrawingDetails,
+  MolNotation,
+  ReactionDrawingDetails,
+  SourceMolNotation,
 import { PayloadResponseType } from '../worker/worker';
 
 export const getSvg = (
@@ -180,4 +184,16 @@ export const getStereoTags = (worker: Worker, { structure }: { structure: string
     key,
     payload: { structure },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_STEREO_TAGS'>);
+};
+
+export const getReactionSvg = (
+  worker: Worker,
+  { reaction, drawingDetails }: { reaction: string; drawingDetails?: ReactionDrawingDetails },
+) => {
+  const key = reaction;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_REACTION_SVG,
+    key,
+    payload: { reaction, drawingDetails },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_REACTION_SVG'>);
 };
