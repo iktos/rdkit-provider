@@ -42,10 +42,12 @@ export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {
 };
 
 const initWorkerCache = ({ cache, removeHs }: { cache: RDKitProviderCacheOptions; removeHs: boolean }) => {
-  const { enableJsMolCaching, maxJsMolsCached } = cache;
+  const { enableSubstructLibCaching, enableJsMolCaching, maxJsMolsCached } = cache;
   globalThis.rdkitWorkerGlobals = {
     jsMolCacheEnabled: !!enableJsMolCaching,
+    substructLibCacheEnabled: !!enableSubstructLibCaching,
     jsMolCache: enableJsMolCaching ? {} : null,
+    substructLibCache: enableSubstructLibCaching ? {} : null,
     maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
     removeHs,
   };
