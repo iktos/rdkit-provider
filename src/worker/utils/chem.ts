@@ -60,9 +60,10 @@ export const getSvg = ({
 export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; width: number; height: number }) => {
   const smartsMol = get_query_molecule(smarts, globalThis.workerRDKit);
   if (!smartsMol) return null;
-
   const svg = smartsMol.get_svg(width, height);
-  smartsMol.delete();
+  release_molecule(smartsMol);
+  return svg;
+};
   return svg;
 };
 
@@ -98,21 +99,16 @@ export const isValidSmiles = (smiles: string): boolean => {
   if (!smiles) return false;
   const mol = get_molecule(smiles, globalThis.workerRDKit);
   if (!mol) return false;
-  const isValid = mol.is_valid();
   release_molecule(mol);
-  return isValid;
+  return true;
 };
 
 export const isValidSmarts = (smarts: string): boolean => {
   if (!smarts) return false;
-  const mol = get_query_molecule(smarts, globalThis.workerRDKit);
-  if (!mol) return false;
-
-  const isValid = mol.is_valid();
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
-    mol.delete();
-  }
-  return isValid;
+  const qmol = get_query_molecule(smarts, globalThis.workerRDKit);
+  if (!qmol) return false;
+  release_molecule(qmol);
+  return true;
 };
 
 export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
@@ -146,11 +142,8 @@ export const isValidMolBlock = (mdl: string) => {
   if (!mdl.includes('M  END')) return false;
   const mol = get_molecule(mdl, globalThis.workerRDKit);
   if (!mol) return false;
-  try {
-    return mol.is_valid();
-  } finally {
-    release_molecule(mol);
-  }
+  release_molecule(mol);
+  return true;
 };
 
 /**
