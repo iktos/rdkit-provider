@@ -1,4 +1,4 @@
-/*
+﻿/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -65,6 +65,11 @@ export const get_query_molecule = (structure: string, RDKit: RDKitModule) => {
     cleanJSMolCache();
     return get_query_molecule_memory_unsafe(structure, RDKit);
   }
+};
+
+export const get_reaction = (reaction: string, RDKit: RDKitModule) => {
+  // @ts-ignore
+  return RDKit.get_rxn(reaction);
 };
 
 export const release_molecule = (mol: JSMol) => {

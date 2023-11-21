@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -23,7 +23,11 @@
 */
 
 import { RDKitProviderCacheOptions } from '../contexts';
-import { AlignmentDetails, DrawingDetails, MolNotation, SourceMolNotation } from './utils/chem';
+  AlignmentDetails,
+  DrawingDetails,
+  MolNotation,
+  ReactionDrawingDetails,
+  SourceMolNotation,
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
@@ -44,6 +48,7 @@ export const RDKIT_WORKER_ACTIONS = {
   ADD_HS: 'ADD_HS',
   GET_NEW_COORDS: 'GET_NEW_COORDS',
   GET_STEREO_TAGS: 'GET_STEREO_TAGS',
+  GET_REACTION_SVG: 'GET_REACTION_SVG',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -143,6 +148,12 @@ export type WorkerMessageNarrower =
       actionType: 'GET_STEREO_TAGS';
       key: string;
       payload: { structure: string };
+    }
+  | {
+      actionType: 'GET_REACTION_SVG';
+      key: string;
+      payload: { reaction: string; drawingDetails?: ReactionDrawingDetails };
+    }
     };
 
 export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {
