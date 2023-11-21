@@ -24,11 +24,14 @@
 
 import { postWorkerJob } from '../worker';
 import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
+import {
   AlignmentDetails,
   DrawingDetails,
   MolNotation,
   ReactionDrawingDetails,
   SourceMolNotation,
+} from '../worker/utils/chem';
+
 import { PayloadResponseType } from '../worker/worker';
 
 export const getSvg = (
