@@ -23,11 +23,7 @@
 */
 
 import { RDKitProviderCacheOptions } from '../contexts';
-  AlignmentDetails,
-  DrawingDetails,
-  MolNotation,
-  ReactionDrawingDetails,
-  SourceMolNotation,
+import { AlignmentDetails, DrawingDetails, MolNotation, ReactionDrawingDetails, SourceMolNotation } from './utils/chem';
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
