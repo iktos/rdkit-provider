@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -41,7 +41,7 @@ export const getSvg = ({
   if (alignmentDetails) {
     const molToAlignWith = get_molecule(alignmentDetails.molBlock, globalThis.workerRDKit);
     if (!molToAlignWith) return null;
-    mol.generate_aligned_coords(molToAlignWith, true);
+    mol.generate_aligned_coords(molToAlignWith, JSON.stringify({ useCoordGen: true }));
     release_molecule(molToAlignWith);
   }
   const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
