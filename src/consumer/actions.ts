@@ -197,3 +197,44 @@ export const getReactionSvg = (
     payload: { reaction, drawingDetails },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_REACTION_SVG'>);
 };
+export const buildSubstructLib = (worker: Worker, { sslibName, replace }: { sslibName: string; replace?: boolean }) => {
+  const key = `${sslibName}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.BUILD_SUBSTRUCT_LIB,
+    key,
+    payload: { sslibName, replace },
+  }).then((msg) => msg.payload as PayloadResponseType<'BUILD_SUBSTRUCT_LIB'>);
+};
+
+export const addSmilesToSubstructLib = (
+  worker: Worker,
+  { smiles, sslibName, trustedSmiles }: { smiles: string; sslibName: string; trustedSmiles?: boolean },
+) => {
+  const key = `${smiles}_${sslibName}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.ADD_SMILES_TO_SUBSTRUCT_LIB,
+    key,
+    payload: { smiles, sslibName, trustedSmiles },
+  }).then((msg) => msg.payload as PayloadResponseType<'ADD_SMILES_TO_SUBSTRUCT_LIB'>);
+};
+
+export const getMatchesFromSubstructLib = (
+  worker: Worker,
+  { query, sslibName }: { query: string; sslibName: string },
+) => {
+  const key = `${query}_${sslibName}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_MATCHES_FROM_SUBSTRUCT_LIB,
+    key,
+    payload: { query, sslibName },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>);
+};
+
+export const deleteSubstructLib = (worker: Worker, { sslibName }: { sslibName: string }) => {
+  const key = `${sslibName}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.DELETE_SUBSTRUCT_LIB,
+    key,
+    payload: { sslibName },
+  }).then((msg) => msg.payload as PayloadResponseType<'DELETE_SUBSTRUCT_LIB'>);
+};

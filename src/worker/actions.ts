@@ -49,6 +49,10 @@ export const RDKIT_WORKER_ACTIONS = {
   GET_NEW_COORDS: 'GET_NEW_COORDS',
   GET_STEREO_TAGS: 'GET_STEREO_TAGS',
   GET_REACTION_SVG: 'GET_REACTION_SVG',
+  BUILD_SUBSTRUCT_LIB: 'BUILD_SUBSTRUCT_LIB',
+  ADD_SMILES_TO_SUBSTRUCT_LIB: 'ADD_SMILES_TO_SUBSTRUCT_LIB',
+  GET_MATCHES_FROM_SUBSTRUCT_LIB: 'GET_MATCHES_FROM_SUBSTRUCT_LIB',
+  DELETE_SUBSTRUCT_LIB: 'DELETE_SUBSTRUCT_LIB',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -154,6 +158,25 @@ export type WorkerMessageNarrower =
       key: string;
       payload: { reaction: string; drawingDetails?: ReactionDrawingDetails };
     }
+  | {
+      actionType: 'BUILD_SUBSTRUCT_LIB';
+      key: string;
+      payload: { sslibName: string; replace?: boolean };
+    }
+  | {
+      actionType: 'ADD_SMILES_TO_SUBSTRUCT_LIB';
+      key: string;
+      payload: { smiles: string; sslibName: string; trustedSmiles?: boolean };
+    }
+  | {
+      actionType: 'GET_MATCHES_FROM_SUBSTRUCT_LIB';
+      key: string;
+      payload: { query: string; sslibName: string };
+    }
+  | {
+      actionType: 'DELETE_SUBSTRUCT_LIB';
+      key: string;
+      payload: { sslibName: string };
     };
 
 export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {
