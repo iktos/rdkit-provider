@@ -91,5 +91,6 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
 
 export interface RDKitProviderCacheOptions {
   enableJsMolCaching?: boolean;
+  enableSubstructLibCaching?: boolean;
   maxJsMolsCached?: number;
 }

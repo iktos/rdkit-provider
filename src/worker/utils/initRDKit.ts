@@ -47,10 +47,12 @@ const initWorkerGlobals = ({
   preferCoordgen: boolean;
   removeHs: boolean;
 }) => {
-  const { enableJsMolCaching, maxJsMolsCached } = cache;
+  const { enableSubstructLibCaching, enableJsMolCaching, maxJsMolsCached } = cache;
   globalThis.rdkitWorkerGlobals = {
     jsMolCacheEnabled: !!enableJsMolCaching,
+    substructLibCacheEnabled: !!enableSubstructLibCaching,
     jsMolCache: enableJsMolCaching ? {} : null,
+    substructLibCache: enableSubstructLibCaching ? {} : null,
     maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
     preferCoordgen,
     removeHs,

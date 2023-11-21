@@ -22,7 +22,7 @@
   SOFTWARE.
 */
 
-import { JSMol } from '@rdkit/rdkit';
+import { JSMol, SubstructLibrary } from '@rdkit/rdkit';
 
 /**
  * Store JSMol object in global jsMolCache
@@ -63,6 +63,25 @@ export const cleanJSMolCache = () => {
       // multiple cleanJSMolCache could be called in the same time, => avoid calling delete on the same mol
     }
   }
+};
+
+export const storeSubstructLibInCache = (name: string, substructLib: SubstructLibrary) => {
+  if (!globalThis.rdkitWorkerGlobals.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache)
+    return;
+  if (globalThis.rdkitWorkerGlobals.substructLibCache[name]) {
+    // @ts-ignore
+    globalThis.rdkitWorkerGlobals.substructLibCache[name].delete();
+    delete globalThis.rdkitWorkerGlobals.substructLibCache[name];
+  }
+
+  globalThis.rdkitWorkerGlobals.substructLibCache[name] = substructLib;
+};
+
+export const getSubstructLibFromCache = (name: string) => {
+  if (!globalThis.rdkitWorkerGlobals.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache) {
+    return null;
+  }
+  return globalThis.rdkitWorkerGlobals.substructLibCache[name];
 };
 
 export const cleanAllCache = () => {

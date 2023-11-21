@@ -22,11 +22,13 @@
   SOFTWARE.
 */
 
-import { JSMol } from '@rdkit/rdkit';
+import { JSMol, SubstructLibrary } from '@rdkit/rdkit';
 
 export interface RDKitWorkerGlobals {
   jsMolCacheEnabled: boolean;
+  substructLibCacheEnabled: boolean;
   jsMolCache: Record<string, JSMol> | null;
+  substructLibCache: Record<string, SubstructLibrary> | null;
   maxJsMolsCached: number;
   preferCoordgen: boolean;
   removeHs: boolean;
