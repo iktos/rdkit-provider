@@ -47,8 +47,8 @@ export const getSvg = ({
     );
     release_molecule(molToAlignWith);
   }
-  const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
-  const svg = mol.get_svg_with_highlights(drawingDetailsStringifyed);
+  const drawingDetailsStringified = drawingDetails ? JSON.stringify(drawingDetails) : '';
+  const svg = mol.get_svg_with_highlights(drawingDetailsStringified);
   if (alignmentDetails) {
     // reset coords as mol could be in cache
     mol.set_new_coords();
