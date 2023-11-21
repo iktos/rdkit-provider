@@ -26,6 +26,7 @@ import { RDKitColor } from '../../types';
 import { get_molecule, get_query_molecule, get_reaction, release_molecule } from './molecule';
 
 import { CIPAtoms, CIPBonds } from '../types';
+import { getSubstructLibFromCache, storeSubstructLibInCache } from './caching';
 
 export const getSvg = ({
   smiles,
@@ -245,6 +246,60 @@ export const getStereoTags = (structure: string) => {
   } finally {
     release_molecule(mol);
   }
+};
+export const getMatchesFromSubstructLib = (query: string, sslibName: string) => {
+  const sslib = getSubstructLibFromCache(sslibName);
+  if (!sslib) throw new Error(`@iktos-oss/rdkit-provider: substruct lib ${sslibName} not builded`);
+
+  const qmol = get_query_molecule(query, globalThis.workerRDKit);
+  if (!qmol) throw new Error(`@iktos-oss/rdkit-provider: could not create qmol`);
+
+  const matches = sslib.get_matches(qmol);
+  release_molecule(qmol);
+  const idxArr: number[] = JSON.parse(matches);
+
+  // @ts-ignore
+  const smilesMatches: string[] = idxArr.map((idx) => sslib.get_trusted_smiles(idx));
+
+  return smilesMatches;
+};
+
+export const addSmilesToSubstructLib = (smiles: string, sslibName: string, trustedSmiles?: boolean): number => {
+  const sslib = getSubstructLibFromCache(sslibName);
+  if (!sslib) throw new Error(`@iktos-oss/rdkit-provider: substruct lib ${sslibName} not builded`);
+
+  if (trustedSmiles) sslib.add_trusted_smiles(smiles);
+  else sslib.add_smiles(smiles);
+
+  // @ts-ignore
+  return sslib.size();
+};
+
+export const buildSubstructLib = (sslibName: string, replace?: boolean) => {
+  let sslib = getSubstructLibFromCache(sslibName);
+  if (sslib) {
+    if (replace) {
+      sslib = new globalThis.workerRDKit.SubstructLibrary();
+      storeSubstructLibInCache(sslibName, sslib);
+      return 'REPLACED';
+    } else return 'ALREADY EXISTS';
+  }
+
+  sslib = new globalThis.workerRDKit.SubstructLibrary();
+  storeSubstructLibInCache(sslibName, sslib);
+
+  return 'CREATED';
+};
+
+export const deleteSubstructLib = (sslibName: string) => {
+  const sslib = getSubstructLibFromCache(sslibName);
+  if (sslib) {
+    // @ts-ignore
+    sslib.delete();
+    return true;
+  }
+
+  return false;
 };
 
 const _validateSource = (structure: string, sourceNotation: SourceMolNotation) => {

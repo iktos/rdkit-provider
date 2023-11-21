@@ -46,6 +46,10 @@ import {
   removeHs,
   getStereoTags,
   getSvgFromReaction,
+  buildSubstructLib,
+  addSmilesToSubstructLib,
+  getMatchesFromSubstructLib,
+  deleteSubstructLib,
 } from './utils/chem';
 import { CIPAtoms, CIPBonds } from './types';
 
@@ -126,6 +130,30 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
         svg: getSvgFromReaction(data.payload),
       } satisfies PayloadResponseType<'GET_REACTION_SVG'>;
       break;
+    case RDKIT_WORKER_ACTIONS.BUILD_SUBSTRUCT_LIB:
+      responsePayload = buildSubstructLib(
+        data.payload.sslibName,
+        data.payload.replace,
+      ) satisfies PayloadResponseType<'BUILD_SUBSTRUCT_LIB'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.ADD_SMILES_TO_SUBSTRUCT_LIB:
+      responsePayload = addSmilesToSubstructLib(
+        data.payload.smiles,
+        data.payload.sslibName,
+        data.payload.trustedSmiles,
+      ) satisfies PayloadResponseType<'ADD_SMILES_TO_SUBSTRUCT_LIB'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.GET_MATCHES_FROM_SUBSTRUCT_LIB:
+      responsePayload = getMatchesFromSubstructLib(
+        data.payload.query,
+        data.payload.sslibName,
+      ) satisfies PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.DELETE_SUBSTRUCT_LIB:
+      responsePayload = deleteSubstructLib(
+        data.payload.sslibName,
+      ) satisfies PayloadResponseType<'DELETE_SUBSTRUCT_LIB'>;
+      break;
     case RDKIT_WORKER_ACTIONS.TERMINATE:
       cleanAllCache();
       self.close();
@@ -165,4 +193,12 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? { CIP_atoms: CIPAtoms; CIP_bonds: CIPBonds }
   : ActionType extends 'GET_REACTION_SVG'
   ? { svg: string | null }
+  : ActionType extends 'BUILD_SUBSTRUCT_LIB'
+  ? 'REPLACED' | 'CREATED' | 'ALREADY EXISTS'
+  : ActionType extends 'ADD_SMILES_TO_SUBSTRUCT_LIB'
+  ? number
+  : ActionType extends 'GET_MATCHES_FROM_SUBSTRUCT_LIB'
+  ? string[]
+  : ActionType extends 'DELETE_SUBSTRUCT_LIB'
+  ? boolean
   : never;

@@ -36,6 +36,10 @@ import {
   removeHs,
   getStereoTags,
   getReactionSvg,
+  buildSubstructLib,
+  addSmilesToSubstructLib,
+  getMatchesFromSubstructLib,
+  deleteSubstructLib,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -126,6 +130,34 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_REACTION_SVG'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getReactionSvg(worker, params);
+      },
+      [worker],
+    ),
+    buildSubstructureLib: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'BUILD_SUBSTRUCT_LIB'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return buildSubstructLib(worker, params);
+      },
+      [worker],
+    ),
+    addSmilesToSubstructLib: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'ADD_SMILES_TO_SUBSTRUCT_LIB'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return addSmilesToSubstructLib(worker, params);
+      },
+      [worker],
+    ),
+    getMatchesFromSubstructLib: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getMatchesFromSubstructLib(worker, params);
+      },
+      [worker],
+    ),
+    deleteSubstructLib: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'DELETE_SUBSTRUCT_LIB'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return deleteSubstructLib(worker, params);
       },
       [worker],
     ),
