@@ -252,8 +252,8 @@ export interface AlignmentDetails {
   highlightColor?: RDKitColor;
 }
 export interface DrawingDetails {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   bondLineWidth?: number;
   backgroundColour?: RDKitColor;
   highlightColour?: RDKitColor;
