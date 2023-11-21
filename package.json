@@ -30,6 +30,7 @@
     "lint-check": "npx eslint --max-warnings 0 \"src/**/*.@(tsx|ts|jsx|js)\"",
     "style-check": "npx prettier --list-different \"src/**/*.@(tsx|ts|jsx|js)\"",
     "tsc-check": "tsc --noEmit --skipLibCheck",
+    "ci-check": "npm run lint-check && npm run style-check && npm run tsc-check",
     "dist-package": "./tools/dist-package.sh",
     "test-dist-package": "./tools/test-dist-package.sh"
   },
