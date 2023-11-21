@@ -1,4 +1,4 @@
-﻿/*
+/*
   MIT License
 
   Copyright (c) 2023 Iktos
@@ -32,7 +32,7 @@ const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
   if (!RDKit) return null;
   const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
   const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
-  storeJSMolInCache(smiles, mol);
+  if (mol) storeJSMolInCache(smiles, mol);
   return mol;
 };
 
@@ -53,7 +53,7 @@ const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule)
   if (!structure) return null;
   if (!RDKit) return null;
   const qmol = RDKit.get_qmol(structure);
-  storeJSMolInCache(structure, qmol);
+  if (qmol) storeJSMolInCache(structure, qmol);
   return qmol;
 };
 
