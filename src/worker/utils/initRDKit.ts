@@ -26,10 +26,7 @@ import { MAX_CACHED_JSMOLS } from '../../constants';
 import { RDKitProviderCacheOptions } from '../../contexts';
 
 export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {} }: InitWorkerOptions) => {
-  if (cache) {
-    initWorkerCache({ cache, removeHs });
-  }
-
+  initWorkerGlobals({ cache, preferCoordgen, removeHs });
   if (globalThis.workerRDKit) return;
 
   const path = rdkitPath || '/RDKit_minimal.js';
@@ -41,12 +38,21 @@ export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {
   globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
 };
 
-const initWorkerCache = ({ cache, removeHs }: { cache: RDKitProviderCacheOptions; removeHs: boolean }) => {
+const initWorkerGlobals = ({
+  cache,
+  preferCoordgen,
+  removeHs,
+}: {
+  cache: RDKitProviderCacheOptions;
+  preferCoordgen: boolean;
+  removeHs: boolean;
+}) => {
   const { enableJsMolCaching, maxJsMolsCached } = cache;
   globalThis.rdkitWorkerGlobals = {
     jsMolCacheEnabled: !!enableJsMolCaching,
     jsMolCache: enableJsMolCaching ? {} : null,
     maxJsMolsCached: maxJsMolsCached ?? MAX_CACHED_JSMOLS,
+    preferCoordgen,
     removeHs,
   };
 };

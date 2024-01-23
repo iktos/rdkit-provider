@@ -28,6 +28,7 @@ export interface RDKitWorkerGlobals {
   jsMolCacheEnabled: boolean;
   jsMolCache: Record<string, JSMol> | null;
   maxJsMolsCached: number;
+  preferCoordgen: boolean;
   removeHs: boolean;
 }
 
