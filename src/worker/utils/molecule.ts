@@ -30,8 +30,14 @@ const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
   if (cachedMolecule) return cachedMolecule;
   if (!smiles) return null;
   if (!RDKit) return null;
+
   const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
   const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
+  if (!mol) {
+    console.error('@iktos-oss/rdkit-provider: failed to get mol for smiles = ', smiles);
+    return null;
+  }
+
   storeJSMolInCache(smiles, mol);
   return mol;
 };
@@ -52,7 +58,13 @@ const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule)
   if (cachedQMolecule) return cachedQMolecule;
   if (!structure) return null;
   if (!RDKit) return null;
+
   const qmol = RDKit.get_qmol(structure);
+  if (!qmol) {
+    console.error('@iktos-oss/rdkit-provider: failed to get qmol for structure =', structure);
+    return null;
+  }
+
   storeJSMolInCache(structure, qmol);
   return qmol;
 };

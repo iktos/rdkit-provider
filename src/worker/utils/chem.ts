@@ -58,7 +58,9 @@ export const getSvg = ({
 };
 
 export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; width: number; height: number }) => {
-  const smartsMol = globalThis.workerRDKit.get_qmol(smarts);
+  const smartsMol = get_query_molecule(smarts, globalThis.workerRDKit);
+  if (!smartsMol) return null;
+
   const svg = smartsMol.get_svg(width, height);
   smartsMol.delete();
   return svg;
@@ -103,7 +105,9 @@ export const isValidSmiles = (smiles: string): boolean => {
 
 export const isValidSmarts = (smarts: string): boolean => {
   if (!smarts) return false;
-  const mol = globalThis.workerRDKit.get_qmol(smarts);
+  const mol = get_query_molecule(smarts, globalThis.workerRDKit);
+  if (!mol) return false;
+
   const isValid = mol.is_valid();
   if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
     mol.delete();
@@ -113,8 +117,8 @@ export const isValidSmarts = (smarts: string): boolean => {
 
 export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
   const smilesMol = get_molecule(smiles, globalThis.workerRDKit);
-  const smartsMol = globalThis.workerRDKit.get_qmol(substructure);
-  if (!smilesMol) return false;
+  const smartsMol = get_query_molecule(substructure, globalThis.workerRDKit);
+  if (!smilesMol || !smartsMol) return false;
   const substructureMatchDetails = JSON.parse(smilesMol.get_substruct_match(smartsMol));
   const smilesDetails = JSON.parse(smilesMol.get_json());
   const matchDetailsNotEmpty = !!substructureMatchDetails && !!Object.keys(substructureMatchDetails).length;
