@@ -250,14 +250,20 @@ export const getStereoTags = (structure: string) => {
     release_molecule(mol);
   }
 };
-export const getMatchesFromSubstructLib = (query: string, sslibName: string) => {
+export const getMatchesFromSubstructLib = (query: string, sslibName: string, options?: SubstructLibraryGetMatchesOptions) => {
+  options = {
+    useChirality: options?.useChirality ?? true,
+    numThreads: options?.numThreads ?? -1,
+    maxResults: options?.maxResults ?? 1000,
+  }
+
   const sslib = getSubstructLibFromCache(sslibName);
   if (!sslib) throw new Error(`@iktos-oss/rdkit-provider: substruct lib ${sslibName} not builded`);
 
   const qmol = get_query_molecule(query, globalThis.workerRDKit);
   if (!qmol) throw new Error(`@iktos-oss/rdkit-provider: could not create qmol`);
 
-  const matches = sslib.get_matches(qmol);
+  const matches = sslib.get_matches(qmol, options.useChirality, options.numThreads, options.maxResults);
   release_molecule(qmol);
   const idxArr: number[] = JSON.parse(matches);
 
@@ -409,3 +415,18 @@ export type SubstructMatch = {
   atoms?: number[];
   bonds?: number[];
 };
+
+export type SubstructLibraryGetMatchesOptions = {
+  /**
+   * enable chiral substructure searching, default to true
+   */
+  useChirality: boolean
+  /**
+  * number of threads to use, default to -1 means all threads
+  */
+  numThreads: number
+  /**
+   * maximum number of results to return, default to 1000
+   */
+  maxResults: number
+}
