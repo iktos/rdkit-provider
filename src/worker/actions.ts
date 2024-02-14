@@ -23,7 +23,7 @@
 */
 
 import { RDKitProviderCacheOptions } from '../contexts';
-import { AlignmentDetails, DrawingDetails, MolNotation, ReactionDrawingDetails, SourceMolNotation } from './utils/chem';
+import { AlignmentDetails, DrawingDetails, MolNotation, ReactionDrawingDetails, SourceMolNotation, SubstructLibraryGetMatchesOptions } from './utils/chem';
 
 export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
@@ -66,114 +66,114 @@ export type WorkerMessage = WorkerMessageNarrower & WorkerMessageGerneric;
 
 export type WorkerMessageNarrower =
   | {
-      actionType: 'INIT_RDKIT_MODULE';
-      key: string;
-      payload: { rdkitPath?: string; cache?: RDKitProviderCacheOptions; preferCoordgen: boolean; removeHs: boolean };
-    }
+    actionType: 'INIT_RDKIT_MODULE';
+    key: string;
+    payload: { rdkitPath?: string; cache?: RDKitProviderCacheOptions; preferCoordgen: boolean; removeHs: boolean };
+  }
   | {
-      actionType: 'GET_SVG';
-      key: string;
-      payload: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails };
-    }
+    actionType: 'GET_SVG';
+    key: string;
+    payload: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails };
+  }
   | {
-      actionType: 'GET_SVG_FROM_SMARTS';
-      key: string;
-      payload: { smarts: string; width: number; height: number };
-    }
+    actionType: 'GET_SVG_FROM_SMARTS';
+    key: string;
+    payload: { smarts: string; width: number; height: number };
+  }
   | {
-      actionType: 'GET_MOLECULE_DETAILS';
-      key: string;
-      payload: { smiles: string };
-    }
+    actionType: 'GET_MOLECULE_DETAILS';
+    key: string;
+    payload: { smiles: string };
+  }
   | {
-      actionType: 'GET_CANONICAL_FORM_FOR_STRUCTURE';
-      key: string;
-      payload: { structure: string; molNotation?: MolNotation; useQMol?: boolean };
-    }
+    actionType: 'GET_CANONICAL_FORM_FOR_STRUCTURE';
+    key: string;
+    payload: { structure: string; molNotation?: MolNotation; useQMol?: boolean };
+  }
   | {
-      actionType: 'IS_VALID_SMILES';
-      key: string;
-      payload: { smiles: string };
-    }
+    actionType: 'IS_VALID_SMILES';
+    key: string;
+    payload: { smiles: string };
+  }
   | {
-      actionType: 'IS_VALID_SMARTS';
-      key: string;
-      payload: { smarts: string };
-    }
+    actionType: 'IS_VALID_SMARTS';
+    key: string;
+    payload: { smarts: string };
+  }
   | {
-      actionType: 'HAS_MATCHING_SUBSTRUCTURE';
-      key: string;
-      payload: { smiles: string; substructure: string };
-    }
+    actionType: 'HAS_MATCHING_SUBSTRUCTURE';
+    key: string;
+    payload: { smiles: string; substructure: string };
+  }
   | {
-      actionType: 'GET_SUBSTRUCTURE_MATCH';
-      key: string;
-      payload: { structure: string; substructure: string };
-    }
+    actionType: 'GET_SUBSTRUCTURE_MATCH';
+    key: string;
+    payload: { structure: string; substructure: string };
+  }
   | {
-      actionType: 'TERMINATE';
-      key: string;
-    }
+    actionType: 'TERMINATE';
+    key: string;
+  }
   | {
-      actionType: 'CONVERT_MOL_NOTATION';
-      key: string;
-      payload: {
-        moleculeString: string;
-        targetNotation: MolNotation;
-        sourceNotation?: SourceMolNotation;
-        useQMol?: boolean;
-      };
-    }
-  | {
-      actionType: 'IS_VALID_MOLBLOCK';
-      key: string;
-      payload: { mdl: string };
-    }
-  | {
-      actionType: 'REMOVE_HS';
-      key: string;
-      payload: { structure: string };
-    }
-  | {
-      actionType: 'ADD_HS';
-      key: string;
-      payload: { structure: string };
-    }
-  | {
-      actionType: 'GET_NEW_COORDS';
-      key: string;
-      payload: { structure: string; useCoordGen?: boolean };
-    }
-  | {
-      actionType: 'GET_STEREO_TAGS';
-      key: string;
-      payload: { structure: string };
-    }
-  | {
-      actionType: 'GET_REACTION_SVG';
-      key: string;
-      payload: { reaction: string; drawingDetails?: ReactionDrawingDetails };
-    }
-  | {
-      actionType: 'BUILD_SUBSTRUCT_LIB';
-      key: string;
-      payload: { sslibName: string; replace?: boolean };
-    }
-  | {
-      actionType: 'ADD_SMILES_TO_SUBSTRUCT_LIB';
-      key: string;
-      payload: { smiles: string; sslibName: string; trustedSmiles?: boolean };
-    }
-  | {
-      actionType: 'GET_MATCHES_FROM_SUBSTRUCT_LIB';
-      key: string;
-      payload: { query: string; sslibName: string };
-    }
-  | {
-      actionType: 'DELETE_SUBSTRUCT_LIB';
-      key: string;
-      payload: { sslibName: string };
+    actionType: 'CONVERT_MOL_NOTATION';
+    key: string;
+    payload: {
+      moleculeString: string;
+      targetNotation: MolNotation;
+      sourceNotation?: SourceMolNotation;
+      useQMol?: boolean;
     };
+  }
+  | {
+    actionType: 'IS_VALID_MOLBLOCK';
+    key: string;
+    payload: { mdl: string };
+  }
+  | {
+    actionType: 'REMOVE_HS';
+    key: string;
+    payload: { structure: string };
+  }
+  | {
+    actionType: 'ADD_HS';
+    key: string;
+    payload: { structure: string };
+  }
+  | {
+    actionType: 'GET_NEW_COORDS';
+    key: string;
+    payload: { structure: string; useCoordGen?: boolean };
+  }
+  | {
+    actionType: 'GET_STEREO_TAGS';
+    key: string;
+    payload: { structure: string };
+  }
+  | {
+    actionType: 'GET_REACTION_SVG';
+    key: string;
+    payload: { reaction: string; drawingDetails?: ReactionDrawingDetails };
+  }
+  | {
+    actionType: 'BUILD_SUBSTRUCT_LIB';
+    key: string;
+    payload: { sslibName: string; replace?: boolean };
+  }
+  | {
+    actionType: 'ADD_SMILES_TO_SUBSTRUCT_LIB';
+    key: string;
+    payload: { smiles: string; sslibName: string; trustedSmiles?: boolean };
+  }
+  | {
+    actionType: 'GET_MATCHES_FROM_SUBSTRUCT_LIB';
+    key: string;
+    payload: { query: string; sslibName: string, options?: SubstructLibraryGetMatchesOptions };
+  }
+  | {
+    actionType: 'DELETE_SUBSTRUCT_LIB';
+    key: string;
+    payload: { sslibName: string };
+  };
 
 export type ActionWorkerMessageNarrowerApplier<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = {
   actionType: ActionType;

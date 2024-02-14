@@ -30,6 +30,7 @@ import {
   MolNotation,
   ReactionDrawingDetails,
   SourceMolNotation,
+  SubstructLibraryGetMatchesOptions,
 } from '../worker/utils/chem';
 
 import { PayloadResponseType } from '../worker/worker';
@@ -223,13 +224,13 @@ export const addSmilesToSubstructLib = (
 
 export const getMatchesFromSubstructLib = (
   worker: Worker,
-  { query, sslibName }: { query: string; sslibName: string },
+  { query, sslibName, options }: { query: string; sslibName: string, options?: SubstructLibraryGetMatchesOptions },
 ) => {
   const key = `${query}_${sslibName}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_MATCHES_FROM_SUBSTRUCT_LIB,
     key,
-    payload: { query, sslibName },
+    payload: { query, sslibName, options },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>);
 };
 
