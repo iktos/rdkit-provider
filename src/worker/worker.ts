@@ -147,7 +147,7 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       responsePayload = getMatchesFromSubstructLib(
         data.payload.query,
         data.payload.sslibName,
-        data.payload.options
+        data.payload.options,
       ) satisfies PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>;
       break;
     case RDKIT_WORKER_ACTIONS.DELETE_SUBSTRUCT_LIB:
@@ -183,9 +183,9 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? { matchingAtoms: number[]; matchingBonds: number[] } | null
   : ActionType extends 'GET_MOLECULE_DETAILS'
   ? {
-    numAtoms: number;
-    numRings: number;
-  } | null
+      numAtoms: number;
+      numRings: number;
+    } | null
   : ActionType extends 'CONVERT_MOL_NOTATION'
   ? { structure: string | null }
   : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'

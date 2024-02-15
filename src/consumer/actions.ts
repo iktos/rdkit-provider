@@ -224,7 +224,7 @@ export const addSmilesToSubstructLib = (
 
 export const getMatchesFromSubstructLib = (
   worker: Worker,
-  { query, sslibName, options }: { query: string; sslibName: string, options?: SubstructLibraryGetMatchesOptions },
+  { query, sslibName, options }: { query: string; sslibName: string; options?: SubstructLibraryGetMatchesOptions },
 ) => {
   const key = `${query}_${sslibName}`;
   return postWorkerJob(worker, {

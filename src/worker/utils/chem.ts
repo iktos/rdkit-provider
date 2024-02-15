@@ -250,12 +250,16 @@ export const getStereoTags = (structure: string) => {
     release_molecule(mol);
   }
 };
-export const getMatchesFromSubstructLib = (query: string, sslibName: string, options?: SubstructLibraryGetMatchesOptions) => {
+export const getMatchesFromSubstructLib = (
+  query: string,
+  sslibName: string,
+  options?: SubstructLibraryGetMatchesOptions,
+) => {
   options = {
     useChirality: options?.useChirality ?? true,
     numThreads: options?.numThreads ?? -1,
     maxResults: options?.maxResults ?? 1000,
-  }
+  };
 
   const sslib = getSubstructLibFromCache(sslibName);
   if (!sslib) throw new Error(`@iktos-oss/rdkit-provider: substruct lib ${sslibName} not builded`);
@@ -413,13 +417,13 @@ export type SubstructLibraryGetMatchesOptions = {
   /**
    * enable chiral substructure searching, default to true
    */
-  useChirality: boolean
+  useChirality: boolean;
   /**
-  * number of threads to use, default to -1 means all threads
-  */
-  numThreads: number
+   * number of threads to use, default to -1 means all threads
+   */
+  numThreads: number;
   /**
    * maximum number of results to return, default to 1000
    */
-  maxResults: number
-}
+  maxResults: number;
+};

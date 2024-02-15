@@ -95,18 +95,18 @@ export const removeSubstructLibFromCache = (name: string) => {
     delete globalThis.rdkitWorkerGlobals.substructLibCache[name];
   }
 
-  return true
-}
+  return true;
+};
 
 export const cleanSubstructLibCache = () => {
-  if (!globalThis.rdkitWorkerGlobals?.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache) return;
+  if (!globalThis.rdkitWorkerGlobals?.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache)
+    return;
   for (const [name, sslib] of Object.entries(globalThis.rdkitWorkerGlobals.substructLibCache)) {
     // @ts-ignore
     sslib.delete();
     delete globalThis.rdkitWorkerGlobals.substructLibCache[name];
   }
-}
-
+};
 
 export const cleanAllCache = () => {
   cleanJSMolCache();
