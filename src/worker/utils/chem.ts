@@ -26,7 +26,7 @@ import { RDKitColor } from '../../types';
 import { get_molecule, get_query_molecule, get_reaction, release_molecule } from './molecule';
 
 import { CIPAtoms, CIPBonds } from '../types';
-import { getSubstructLibFromCache, storeSubstructLibInCache } from './caching';
+import { getSubstructLibFromCache, removeSubstructLibFromCache, storeSubstructLibInCache } from './caching';
 
 export const getSvg = ({
   smiles,
@@ -301,14 +301,7 @@ export const buildSubstructLib = (sslibName: string, replace?: boolean) => {
 };
 
 export const deleteSubstructLib = (sslibName: string) => {
-  const sslib = getSubstructLibFromCache(sslibName);
-  if (sslib) {
-    // @ts-ignore
-    sslib.delete();
-    return true;
-  }
-
-  return false;
+  return removeSubstructLibFromCache(sslibName);
 };
 
 const _validateSource = (structure: string, sourceNotation: SourceMolNotation) => {
