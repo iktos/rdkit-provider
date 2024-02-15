@@ -84,6 +84,30 @@ export const getSubstructLibFromCache = (name: string) => {
   return globalThis.rdkitWorkerGlobals.substructLibCache[name];
 };
 
+export const removeSubstructLibFromCache = (name: string) => {
+  if (!globalThis.rdkitWorkerGlobals.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache) {
+    return false;
+  }
+
+  if (globalThis.rdkitWorkerGlobals.substructLibCache[name]) {
+    // @ts-ignore
+    globalThis.rdkitWorkerGlobals.substructLibCache[name].delete();
+    delete globalThis.rdkitWorkerGlobals.substructLibCache[name];
+  }
+
+  return true
+}
+
+export const cleanSubstructLibCache = () => {
+  if (!globalThis.rdkitWorkerGlobals?.substructLibCacheEnabled || !globalThis.rdkitWorkerGlobals.substructLibCache) return;
+  for (const [name, sslib] of Object.entries(globalThis.rdkitWorkerGlobals.substructLibCache)) {
+    // @ts-ignore
+    sslib.delete();
+    delete globalThis.rdkitWorkerGlobals.substructLibCache[name];
+  }
+}
+
+
 export const cleanAllCache = () => {
   cleanJSMolCache();
 };
