@@ -40,6 +40,7 @@ import {
   addSmilesToSubstructLib,
   getMatchesFromSubstructLib,
   deleteSubstructLib,
+  getSubstructLibSize,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -151,6 +152,13 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return getMatchesFromSubstructLib(worker, params);
+      },
+      [worker],
+    ),
+    getSubstructLibSize: useCallback(
+      (params: ActionWorkerMessageNarrowerApplier<'GET_SUBSTRUCT_LIB_SIZE'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getSubstructLibSize(worker, params);
       },
       [worker],
     ),

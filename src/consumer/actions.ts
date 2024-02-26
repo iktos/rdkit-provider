@@ -234,6 +234,15 @@ export const getMatchesFromSubstructLib = (
   }).then((msg) => msg.payload as PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>);
 };
 
+export const getSubstructLibSize = (worker: Worker, { sslibName }: { sslibName: string }) => {
+  const key = `$${sslibName}`;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_SUBSTRUCT_LIB_SIZE,
+    key,
+    payload: { sslibName },
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_SUBSTRUCT_LIB_SIZE'>);
+};
+
 export const deleteSubstructLib = (worker: Worker, { sslibName }: { sslibName: string }) => {
   const key = `${sslibName}`;
   return postWorkerJob(worker, {

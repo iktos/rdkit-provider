@@ -55,6 +55,7 @@ export const RDKIT_WORKER_ACTIONS = {
   BUILD_SUBSTRUCT_LIB: 'BUILD_SUBSTRUCT_LIB',
   ADD_SMILES_TO_SUBSTRUCT_LIB: 'ADD_SMILES_TO_SUBSTRUCT_LIB',
   GET_MATCHES_FROM_SUBSTRUCT_LIB: 'GET_MATCHES_FROM_SUBSTRUCT_LIB',
+  GET_SUBSTRUCT_LIB_SIZE: 'GET_SUBSTRUCT_LIB_SIZE',
   DELETE_SUBSTRUCT_LIB: 'DELETE_SUBSTRUCT_LIB',
 } as const;
 
@@ -175,6 +176,11 @@ export type WorkerMessageNarrower =
       actionType: 'GET_MATCHES_FROM_SUBSTRUCT_LIB';
       key: string;
       payload: { query: string; sslibName: string; options?: SubstructLibraryGetMatchesOptions };
+    }
+  | {
+      actionType: 'GET_SUBSTRUCT_LIB_SIZE';
+      key: string;
+      payload: { sslibName: string };
     }
   | {
       actionType: 'DELETE_SUBSTRUCT_LIB';

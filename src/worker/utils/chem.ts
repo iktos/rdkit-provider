@@ -250,6 +250,15 @@ export const getStereoTags = (structure: string) => {
     release_molecule(mol);
   }
 };
+
+export const getSubstructLibSize = (sslibName: string): number => {
+  const sslib = getSubstructLibFromCache(sslibName);
+  if (!sslib) throw new Error(`@iktos-oss/rdkit-provider: substruct lib ${sslibName} not builded`);
+
+  // @ts-ignore
+  return sslib.size();
+};
+
 export const getMatchesFromSubstructLib = (
   query: string,
   sslibName: string,

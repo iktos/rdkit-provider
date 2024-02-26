@@ -50,6 +50,7 @@ import {
   addSmilesToSubstructLib,
   getMatchesFromSubstructLib,
   deleteSubstructLib,
+  getSubstructLibSize,
 } from './utils/chem';
 import { CIPAtoms, CIPBonds } from './types';
 
@@ -150,6 +151,11 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
         data.payload.options,
       ) satisfies PayloadResponseType<'GET_MATCHES_FROM_SUBSTRUCT_LIB'>;
       break;
+    case RDKIT_WORKER_ACTIONS.GET_SUBSTRUCT_LIB_SIZE:
+      responsePayload = getSubstructLibSize(
+        data.payload.sslibName,
+      ) satisfies PayloadResponseType<'GET_SUBSTRUCT_LIB_SIZE'>;
+      break;
     case RDKIT_WORKER_ACTIONS.DELETE_SUBSTRUCT_LIB:
       responsePayload = deleteSubstructLib(
         data.payload.sslibName,
@@ -200,6 +206,8 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   ? number
   : ActionType extends 'GET_MATCHES_FROM_SUBSTRUCT_LIB'
   ? string[]
+  : ActionType extends 'GET_SUBSTRUCT_LIB_SIZE'
+  ? number
   : ActionType extends 'DELETE_SUBSTRUCT_LIB'
   ? boolean
   : never;
