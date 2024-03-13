@@ -62,7 +62,7 @@ export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; wi
   if (!smartsMol) return null;
 
   const svg = smartsMol.get_svg(width, height);
-  smartsMol.delete();
+  release_molecule(smartsMol);
   return svg;
 };
 
@@ -109,9 +109,7 @@ export const isValidSmarts = (smarts: string): boolean => {
   if (!mol) return false;
 
   const isValid = mol.is_valid();
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
-    mol.delete();
-  }
+  release_molecule(mol);
   return isValid;
 };
 
