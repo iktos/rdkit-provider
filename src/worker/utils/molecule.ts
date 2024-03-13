@@ -91,9 +91,7 @@ export const get_molecule_details = ({ smiles }: GetMoleculeDetailsParams, RDKit
   const mol = get_molecule(smiles, RDKit);
   if (!mol) return null;
   const details = JSON.parse(mol.get_descriptors());
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
-    mol.delete();
-  }
+  release_molecule(mol);
 
   return {
     numAtoms: details.NumHeavyAtoms,
