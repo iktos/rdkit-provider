@@ -131,7 +131,7 @@ export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: stri
 
 export const getMatchingSubstructure = ({ structure, substructure }: { structure: string; substructure: string }) => {
   const mol = get_molecule(structure, globalThis.workerRDKit);
-  const molToMach = get_molecule(substructure, globalThis.workerRDKit);
+  const molToMach = get_query_molecule(substructure, globalThis.workerRDKit);
   if (!mol || !molToMach) return null;
   const { atoms, bonds } = JSON.parse(mol.get_substruct_match(molToMach)) as { atoms: number[]; bonds: number[] };
   release_molecule(mol);
