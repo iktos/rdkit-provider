@@ -23,10 +23,10 @@
 */
 
 import { JSMol, RDKitModule } from '@rdkit/rdkit';
-import { cleanJSMolCache, getJSMolFromCache, storeJSMolInCache } from './caching';
+import { cleanMolCache, getJSMolFromCache, storeJSMolInCache } from './caching';
 
 const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
-  const cachedMolecule = getJSMolFromCache(smiles);
+  const cachedMolecule = getJSMolFromCache(smiles, 'mol');
   if (cachedMolecule) return cachedMolecule;
   if (!smiles) return null;
   if (!RDKit) return null;
@@ -38,7 +38,7 @@ const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
     return null;
   }
 
-  storeJSMolInCache(smiles, mol);
+  storeJSMolInCache(smiles, mol, 'mol');
   return mol;
 };
 
@@ -48,13 +48,13 @@ export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
   } catch (e) {
     // clean cache on possible Runtimeerror OOM
     console.error(e);
-    cleanJSMolCache();
+    cleanMolCache();
     return get_molecule_memory_unsafe(smiles, RDKit);
   }
 };
 
 const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule) => {
-  const cachedQMolecule = getJSMolFromCache(structure);
+  const cachedQMolecule = getJSMolFromCache(structure, 'qmol');
   if (cachedQMolecule) return cachedQMolecule;
   if (!structure) return null;
   if (!RDKit) return null;
@@ -65,7 +65,7 @@ const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule)
     return null;
   }
 
-  storeJSMolInCache(structure, qmol);
+  storeJSMolInCache(structure, qmol, 'qmol');
   return qmol;
 };
 
@@ -74,7 +74,7 @@ export const get_query_molecule = (structure: string, RDKit: RDKitModule) => {
     return get_query_molecule_memory_unsafe(structure, RDKit);
   } catch (e) {
     console.error(e);
-    cleanJSMolCache();
+    cleanMolCache();
     return get_query_molecule_memory_unsafe(structure, RDKit);
   }
 };
