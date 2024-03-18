@@ -79,7 +79,6 @@ export const getMoleculeDetails = (smiles: string) => {
 
 export const getCanonicalFormForStructure = ({
   structure,
-  molNotation = 'smiles',
   useQMol = false,
 }: {
   structure: string;
@@ -88,9 +87,9 @@ export const getCanonicalFormForStructure = ({
 }): string | null => {
   return convertMolNotation({
     moleculeString: structure,
-    targetNotation: molNotation,
-    sourceNotation: undefined,
+    targetNotation: useQMol ? 'smarts' : 'smiles',
     useQMol,
+    sourceNotation: undefined,
   });
 };
 
