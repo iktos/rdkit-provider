@@ -24,47 +24,101 @@
 
 import { JSMol } from '@rdkit/rdkit';
 
+type MolType = 'mol' | 'qmol';
+
+const stroeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType: MolType) => {
+  if (
+    !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
+    !globalThis.rdkitWorkerGlobals.jsMolCache ||
+    !globalThis.rdkitWorkerGlobals.jsQMolCache
+  )
+    return;
+  if (molType == 'mol') {
+    globalThis.rdkitWorkerGlobals.jsMolCache[structure] = jsMol;
+  }
+  if (molType == 'qmol') {
+    globalThis.rdkitWorkerGlobals.jsQMolCache[structure] = jsMol;
+  }
+};
+
 /**
- * Store JSMol object in global jsMolCache
+ * Store JSMol object in global jsMolCache & jsQMolCache
  * @param structure can be a smiles, smarts or molblock...
  * @param jsMol can be a mol or qmol
  */
-export const storeJSMolInCache = (structure: string, jsMol: JSMol) => {
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled || !globalThis.rdkitWorkerGlobals.jsMolCache) return;
-  const nbCachedMolecules = Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length;
-  if (nbCachedMolecules > globalThis.rdkitWorkerGlobals.maxJsMolsCached) {
-    cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [structure]: jsMol };
+export const storeJSMolInCache = (structure: string, jsMol: JSMol, molType: MolType) => {
+  if (
+    !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
+    (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
+  )
+    return;
+  const nbCachedMolecules = globalThis.rdkitWorkerGlobals.jsMolCache
+    ? Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length
+    : 0;
+  const nbCachedQMolecules = globalThis.rdkitWorkerGlobals.jsQMolCache
+    ? Object.keys(globalThis.rdkitWorkerGlobals.jsQMolCache).length
+    : 0;
+  if (nbCachedMolecules + nbCachedQMolecules > globalThis.rdkitWorkerGlobals.maxJsMolsCached) {
+    cleanMolCache();
+    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
     return;
   }
   try {
-    globalThis.rdkitWorkerGlobals.jsMolCache[structure] = jsMol;
+    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
   } catch (e) {
     console.error(e);
-    cleanJSMolCache();
-    globalThis.rdkitWorkerGlobals.jsMolCache = { [structure]: jsMol };
+    cleanMolCache();
+    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
   }
 };
 
-export const getJSMolFromCache = (structure: string) => {
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled || !globalThis.rdkitWorkerGlobals.jsMolCache) {
+export const getJSMolFromCache = (structure: string, molType: MolType) => {
+  if (
+    !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
+    (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
+  ) {
     return null;
   }
-  return globalThis.rdkitWorkerGlobals.jsMolCache[structure];
+
+  if (molType == 'mol') {
+    if (!globalThis.rdkitWorkerGlobals.jsMolCache) {
+      return null;
+    }
+    return globalThis.rdkitWorkerGlobals.jsMolCache[structure];
+  }
+  if (molType == 'qmol') {
+    if (!globalThis.rdkitWorkerGlobals.jsQMolCache) {
+      return null;
+    }
+    return globalThis.rdkitWorkerGlobals.jsQMolCache[structure];
+  }
+
+  throw new Error(`@iktos-oss/rdkit-provider unkown molType=${molType} passed to getJSMolFromCache`);
 };
 
-export const cleanJSMolCache = () => {
-  if (!globalThis.rdkitWorkerGlobals?.jsMolCache) return;
-  for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
-    try {
-      mol.delete();
-      delete globalThis.rdkitWorkerGlobals.jsMolCache[structure];
-    } catch {
-      // multiple cleanJSMolCache could be called in the same time, => avoid calling delete on the same mol
+export const cleanMolCache = () => {
+  if (globalThis.rdkitWorkerGlobals?.jsMolCache) {
+    for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
+      try {
+        mol.delete();
+        delete globalThis.rdkitWorkerGlobals.jsMolCache[structure];
+      } catch {
+        // multiple cleanMolCache could be called in the same time, => avoid calling delete on the same mol
+      }
+    }
+  }
+  if (globalThis.rdkitWorkerGlobals?.jsQMolCache) {
+    for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsQMolCache)) {
+      try {
+        mol.delete();
+        delete globalThis.rdkitWorkerGlobals.jsQMolCache[structure];
+      } catch {
+        // multiple cleanMolCache could be called in the same time, => avoid calling delete on the same mol
+      }
     }
   }
 };
 
 export const cleanAllCache = () => {
-  cleanJSMolCache();
+  cleanMolCache();
 };
