@@ -117,15 +117,9 @@ export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: stri
   const smartsMol = get_query_molecule(substructure, globalThis.workerRDKit);
   if (!smilesMol || !smartsMol) return false;
   const substructureMatchDetails = JSON.parse(smilesMol.get_substruct_match(smartsMol));
-  const smilesDetails = JSON.parse(smilesMol.get_json());
   const matchDetailsNotEmpty = !!substructureMatchDetails && !!Object.keys(substructureMatchDetails).length;
 
-  return (
-    matchDetailsNotEmpty &&
-    !!smilesDetails.molecules &&
-    smilesDetails.molecules?.length === 1 &&
-    substructureMatchDetails.atoms?.length === smilesDetails.molecules[0]?.atoms?.length
-  );
+  return matchDetailsNotEmpty;
 };
 
 export const getMatchingSubstructure = ({ structure, substructure }: { structure: string; substructure: string }) => {
