@@ -26,7 +26,7 @@ import { useCallback } from 'react';
 import {
   addHs,
   convertMolNotation,
-  getMoleculeDetails,
+  getMoleculeDetails as getMoleculeDetailsAction,
   getNewCoords,
   getSvg,
   hasMatchingSubstructure,
@@ -39,10 +39,29 @@ import {
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
 import { useRDKit } from '../../hooks/useRDKit';
+import { PayloadResponseType } from '../../worker/worker';
 
 export const useRDKitUtils = () => {
   const { worker } = useRDKit();
 
+  function getMoleculeDetails(params: {
+    smiles: string;
+    returnFullDetails: true;
+  }): Promise<PayloadResponseType<'GET_MOLECULE_DETAILS'>>;
+  function getMoleculeDetails(params: {
+    smiles: string;
+    returnFullDetails?: false | undefined;
+  }): Promise<PayloadResponseType<'DEPRECATED_GET_MOLECULE_DETAILS'>>;
+
+  function getMoleculeDetails({ smiles, returnFullDetails = false }: { smiles: string; returnFullDetails?: boolean }) {
+    // returnFullDetails = false is deprecated, returnFullDetails will be removed in v3 and returnFullDetails = true will be the default behavior
+    if (!worker) return rejectForWorkerNotInitted();
+
+    // Handle different logic based on returnFullDetails flag
+    return returnFullDetails
+      ? getMoleculeDetailsAction(worker, { smiles, returnFullDetails: true })
+      : getMoleculeDetailsAction(worker, { smiles, returnFullDetails: false });
+  }
   return {
     isValidSmiles: useCallback(
       async (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMILES'>['payload']) => {
@@ -65,13 +84,9 @@ export const useRDKitUtils = () => {
       },
       [worker],
     ),
-    getMoleculeDetails: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'GET_MOLECULE_DETAILS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getMoleculeDetails(worker, params);
-      },
-      [worker],
-    ),
+    // igonring getMoleculeDetails as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    getMoleculeDetails: useCallback(getMoleculeDetails, [worker]),
     getSvg: useCallback(
       (params: ActionWorkerMessageNarrowerApplier<'GET_SVG'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();

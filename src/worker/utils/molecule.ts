@@ -85,20 +85,3 @@ export const release_molecule = (mol: JSMol) => {
     mol.delete();
   }
 };
-
-export const get_molecule_details = ({ smiles }: GetMoleculeDetailsParams, RDKit: RDKitModule | null) => {
-  if (!RDKit) return null;
-  const mol = get_molecule(smiles, RDKit);
-  if (!mol) return null;
-  const details = JSON.parse(mol.get_descriptors());
-  release_molecule(mol);
-
-  return {
-    numAtoms: details.NumHeavyAtoms,
-    numRings: details.NumRings,
-  };
-};
-
-export interface GetMoleculeDetailsParams {
-  smiles: string;
-}

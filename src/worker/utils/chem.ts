@@ -66,16 +66,33 @@ export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; wi
   return svg;
 };
 
-export const getMoleculeDetails = (smiles: string) => {
+export type DeprecatedMoleculeBasicDetails = {
+  numAtoms: number;
+  numRings: number;
+};
+
+type MoleculeFullDetails = Descriptors;
+
+export function getMoleculeDetails(params: { smiles: string; returnFullDetails: true }): MoleculeFullDetails | null;
+export function getMoleculeDetails(params: {
+  smiles: string;
+  returnFullDetails: false;
+}): DeprecatedMoleculeBasicDetails | null;
+export function getMoleculeDetails({ smiles, returnFullDetails }: { smiles: string; returnFullDetails: boolean }) {
   const mol = get_molecule(smiles, globalThis.workerRDKit);
   if (!mol) return null;
   const details = JSON.parse(mol.get_descriptors());
   release_molecule(mol);
+
+  if (returnFullDetails) {
+    return details as MoleculeFullDetails;
+  }
+  // Return basic details (numAtoms, numRings) will be deprecated in ^v3.0.0
   return {
     numAtoms: details.NumHeavyAtoms,
     numRings: details.NumRings,
-  };
-};
+  } as DeprecatedMoleculeBasicDetails;
+}
 
 export const getCanonicalFormForStructure = ({
   structure,

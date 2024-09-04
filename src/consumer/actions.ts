@@ -55,14 +55,33 @@ export const getSvgFromSmarts = (
   }).then((msg) => msg.payload as PayloadResponseType<'GET_SVG_FROM_SMARTS'>);
 };
 
-export const getMoleculeDetails = (worker: Worker, { smiles }: { smiles: string }) => {
+export function getMoleculeDetails(
+  worker: Worker,
+  params: { smiles: string; returnFullDetails: true },
+): Promise<PayloadResponseType<'GET_MOLECULE_DETAILS'>>;
+export function getMoleculeDetails(
+  worker: Worker,
+  params: { smiles: string; returnFullDetails?: false | undefined },
+): Promise<PayloadResponseType<'DEPRECATED_GET_MOLECULE_DETAILS'>>;
+export function getMoleculeDetails( // returnFullDetails = false is deprecated, returnFullDetails will be removed in v3 and returnFullDetails = true will be the default behavior
+  worker: Worker,
+  { smiles, returnFullDetails = false }: { smiles: string; returnFullDetails?: boolean },
+) {
   const key = smiles;
+  if (!returnFullDetails) {
+    return postWorkerJob(worker, {
+      actionType: RDKIT_WORKER_ACTIONS.DEPRECATED_GET_MOLECULE_DETAILS,
+      key,
+      payload: { smiles },
+    }).then((msg) => msg.payload as PayloadResponseType<'DEPRECATED_GET_MOLECULE_DETAILS'>);
+  }
+
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS,
-    key: key,
+    key,
     payload: { smiles },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_MOLECULE_DETAILS'>);
-};
+}
 
 export const getCanonicalFormForStructure = (
   worker: Worker,
