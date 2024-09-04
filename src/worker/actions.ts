@@ -32,6 +32,7 @@ export const RDKIT_WORKER_ACTIONS = {
   GET_SVG: 'GET_SVG',
   GET_SVG_FROM_SMARTS: 'GET_SVG_FROM_SMARTS',
   GET_MOLECULE_DETAILS: 'GET_MOLECULE_DETAILS',
+  DEPRECATED_GET_MOLECULE_DETAILS: 'DEPRECATED_GET_MOLECULE_DETAILS',
   GET_CANONICAL_FORM_FOR_STRUCTURE: 'GET_CANONICAL_FORM_FOR_STRUCTURE',
   IS_VALID_SMILES: 'IS_VALID_SMILES',
   IS_VALID_SMARTS: 'IS_VALID_SMARTS',
@@ -77,6 +78,11 @@ export type WorkerMessageNarrower =
     }
   | {
       actionType: 'GET_MOLECULE_DETAILS';
+      key: string;
+      payload: { smiles: string };
+    }
+  | {
+      actionType: 'DEPRECATED_GET_MOLECULE_DETAILS';
       key: string;
       payload: { smiles: string };
     }

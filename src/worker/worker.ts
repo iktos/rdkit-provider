@@ -45,6 +45,8 @@ import {
   isValidSmiles,
   removeHs,
   getStereoTags,
+  Descriptors,
+  DeprecatedMoleculeBasicDetails,
 } from './utils/chem';
 import { CIPAtoms, CIPBonds } from './types';
 
@@ -55,7 +57,19 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       await initRdkit(data.payload);
       break;
     case RDKIT_WORKER_ACTIONS.GET_MOLECULE_DETAILS:
-      responsePayload = getMoleculeDetails(data.payload.smiles) satisfies PayloadResponseType<'GET_MOLECULE_DETAILS'>;
+      responsePayload = getMoleculeDetails({
+        smiles: data.payload.smiles,
+        returnFullDetails: true,
+      }) satisfies PayloadResponseType<'GET_MOLECULE_DETAILS'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.DEPRECATED_GET_MOLECULE_DETAILS:
+      console.warn(
+        '[DEPRECATED] Using deprecated molecule details retrieval. Please update to the full details API by passing returnFullDetails=true, careful numAtom is now NumHeavyAtom and not NumAtom.',
+      );
+      responsePayload = getMoleculeDetails({
+        smiles: data.payload.smiles,
+        returnFullDetails: false,
+      }) satisfies PayloadResponseType<'DEPRECATED_GET_MOLECULE_DETAILS'>;
       break;
     case RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE:
       responsePayload = {
@@ -147,10 +161,9 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   : ActionType extends 'GET_SUBSTRUCTURE_MATCH'
   ? { matchingAtoms: number[]; matchingBonds: number[] } | null
   : ActionType extends 'GET_MOLECULE_DETAILS'
-  ? {
-      numAtoms: number;
-      numRings: number;
-    } | null
+  ? Descriptors | null
+  : ActionType extends 'DEPRECATED_GET_MOLECULE_DETAILS'
+  ? DeprecatedMoleculeBasicDetails | null
   : ActionType extends 'CONVERT_MOL_NOTATION'
   ? { structure: string | null }
   : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'
