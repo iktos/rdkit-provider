@@ -28,12 +28,13 @@ import { RDKIT_WORKER_ACTIONS } from '../worker/actions';
 import { postWorkerJob } from '../worker/utils/postJob';
 
 export interface RDKitContextValue {
-  worker: Worker | null;
+  workers: Worker[];
 }
 
 export type RDKitProviderProps = PropsWithChildren<{
   cache?: RDKitProviderCacheOptions;
-  initialWorkerInstance?: Worker;
+  initialWorkerInstances?: Worker[];
+  numWorkers?: number;
   preferCoordgen?: boolean;
   removeHs?: boolean;
   rdkitPath?: string;
@@ -46,31 +47,42 @@ export const RDKitContext = React.createContext<RDKitContextValue>(undefined as 
 
 export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   cache,
-  initialWorkerInstance = null,
+  initialWorkerInstances = [],
+  numWorkers = 1,
   preferCoordgen = false,
   removeHs = true,
   rdkitPath,
   rdkitWorkerPublicFolder,
   children,
 }) => {
-  const [worker, setWorker] = useState<Worker | null>(null);
+  const [workers, setWorkers] = useState<Worker[]>([]);
 
   useEffect(() => {
     let isProviderMounted = true;
-    let workerInstance: Worker | null = initialWorkerInstance;
+    let workerInstances = initialWorkerInstances;
 
     const initialise = async () => {
-      if (!workerInstance) workerInstance = initWorker(rdkitWorkerPublicFolder);
+      if (workerInstances.length < numWorkers) {
+        const additionalWorkers = Array.from({ length: numWorkers - workerInstances.length }, () =>
+          initWorker(rdkitWorkerPublicFolder),
+        );
+        workerInstances = [...workerInstances, ...additionalWorkers];
+      }
 
-      // await rdkit module init in worker before starting using the worker
-      await postWorkerJob(workerInstance, {
-        actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
-        key: 'worker-init',
-        payload: { rdkitPath, cache, preferCoordgen, removeHs },
-      });
+      console.log('workerInstances', workerInstances);
 
-      if (isProviderMounted && workerInstance) {
-        setWorker(workerInstance);
+      await Promise.all(
+        workerInstances.map((worker) =>
+          postWorkerJob(worker, {
+            actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
+            key: 'worker-init',
+            payload: { rdkitPath, cache, preferCoordgen, removeHs },
+          }),
+        ),
+      );
+
+      if (isProviderMounted) {
+        setWorkers(workerInstances);
       }
     };
 
@@ -78,15 +90,18 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
 
     return () => {
       isProviderMounted = false;
-      if (!workerInstance) return;
-      postWorkerJob(workerInstance, {
-        actionType: RDKIT_WORKER_ACTIONS.TERMINATE,
-        key: 'worker-terminate',
+      workerInstances.forEach((worker) => {
+        postWorkerJob(worker, {
+          actionType: RDKIT_WORKER_ACTIONS.TERMINATE,
+          key: 'worker-terminate',
+        });
       });
     };
-  }, [initialWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPublicFolder, removeHs]);
+    // TODO FIXME
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numWorkers, cache, preferCoordgen, rdkitPath, rdkitWorkerPublicFolder, removeHs]);
 
-  return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
+  return <RDKitContext.Provider value={{ workers }}>{children}</RDKitContext.Provider>;
 };
 
 export interface RDKitProviderCacheOptions {
