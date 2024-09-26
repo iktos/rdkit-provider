@@ -110,6 +110,23 @@ export const getCanonicalFormForStructure = ({
   });
 };
 
+export const isChiral = (smiles: string): boolean => {
+  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  if (!mol) {
+    throw new Error('@iktos-oss/rdkit-provider: Failed to instanciate molecule');
+  }
+
+  try {
+    // @ts-ignore
+    const achiralSmiles = mol.get_smiles(JSON.stringify({ doIsomericSmiles: false }));
+    // @ts-ignore
+    const chiralSmiles = mol.get_smiles(JSON.stringify({ doIsomericSmiles: true }));
+    return achiralSmiles !== chiralSmiles;
+  } finally {
+    release_molecule(mol);
+  }
+};
+
 export const isValidSmiles = (smiles: string): boolean => {
   if (!smiles) return false;
   const mol = get_molecule(smiles, globalThis.workerRDKit);

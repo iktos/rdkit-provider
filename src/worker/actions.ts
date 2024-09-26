@@ -29,6 +29,7 @@ export const RDKIT_WORKER_ACTIONS = {
   INIT_RDKIT_MODULE: 'INIT_RDKIT_MODULE',
   LOCAL_RESPONSE: 'LOCAL_RESPONSE',
   BROADCASTED_RESPONSE: 'BROADCASTED_RESPONSE',
+  IS_CHIRAL: 'IS_CHIRAL',
   GET_SVG: 'GET_SVG',
   GET_SVG_FROM_SMARTS: 'GET_SVG_FROM_SMARTS',
   GET_MOLECULE_DETAILS: 'GET_MOLECULE_DETAILS',
@@ -65,6 +66,11 @@ export type WorkerMessageNarrower =
       actionType: 'INIT_RDKIT_MODULE';
       key: string;
       payload: { rdkitPath?: string; cache?: RDKitProviderCacheOptions; preferCoordgen: boolean; removeHs: boolean };
+    }
+  | {
+      actionType: 'IS_CHIRAL';
+      key: string;
+      payload: { smiles: string };
     }
   | {
       actionType: 'GET_SVG';

@@ -47,6 +47,7 @@ import {
   getStereoTags,
   Descriptors,
   DeprecatedMoleculeBasicDetails,
+  isChiral,
 } from './utils/chem';
 import { CIPAtoms, CIPBonds } from './types';
 
@@ -75,6 +76,9 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
       responsePayload = {
         canonicalForm: getCanonicalFormForStructure(data.payload),
       } satisfies PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>;
+      break;
+    case RDKIT_WORKER_ACTIONS.IS_CHIRAL:
+      responsePayload = isChiral(data.payload.smiles) satisfies PayloadResponseType<'IS_CHIRAL'>;
       break;
     case RDKIT_WORKER_ACTIONS.GET_SVG:
       responsePayload = {
@@ -152,6 +156,8 @@ export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = 
   | 'GET_SVG'
   | 'GET_SVG_FROM_SMARTS'
   ? { svg: string | null }
+  : ActionType extends 'IS_CHIRAL'
+  ? boolean
   : ActionType extends 'IS_VALID_SMILES' | 'IS_VALID_SMARTS' | 'IS_VALID_MOLBLOCK'
   ? { isValid: boolean }
   : ActionType extends 'GET_CANONICAL_FORM_FOR_STRUCTURE'

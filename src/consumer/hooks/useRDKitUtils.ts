@@ -35,6 +35,7 @@ import {
   isValidSmiles,
   removeHs,
   getStereoTags,
+  isChiral,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -74,6 +75,13 @@ export const useRDKitUtils = () => {
       (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMARTS'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return isValidSmarts(worker, params);
+      },
+      [worker],
+    ),
+    isChiral: useCallback(
+      async (params: ActionWorkerMessageNarrowerApplier<'IS_CHIRAL'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return isChiral(worker, params);
       },
       [worker],
     ),
