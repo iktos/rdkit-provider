@@ -34,6 +34,9 @@
     "test-dist-package": "./tools/test-dist-package.sh"
   },
   "author": "Ramzi Oueslati <ramzi.oueslati@iktos.com>",
+  "dependencies": {
+    "@rdkit/rdkit": "^2024.3.5-1.0.0"
+  },
   "devDependencies": {
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.26",
@@ -54,7 +57,6 @@
     "webpack-cli": "^5.0.1"
   },
   "peerDependencies": {
-    "@rdkit/rdkit": "^2024.3.5-1.0.0",
     "react": ">=17.0.2",
     "react-dom": ">=17.0.2"
   }
