@@ -45,12 +45,23 @@ import {
   isValidSmiles,
   removeHs,
   getStereoTags,
-  Descriptors,
-  DeprecatedMoleculeBasicDetails,
   isChiral,
   getMorganFp,
 } from './utils/chem';
-import { CIPAtoms, CIPBonds } from './types';
+import {
+  ConvertMolNotationOutputType,
+  Deprecated_GetMoleculeDetailsOutputType,
+  GetCanonicalFormOutputType,
+  GetMDLOutputType,
+  GetMoleculeDetailsOutputType,
+  GetMorganFpOutputType,
+  GetSteroTagsOutputType,
+  GetSubstructureMatchOutputType,
+  GetSVGOutputType,
+  HasMatchingOutputType,
+  IsChiralOutputType,
+  IsValidOutputType,
+} from '../types';
 
 addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
   let responsePayload;
@@ -159,27 +170,27 @@ addEventListener('message', async ({ data }: { data: WorkerMessage }) => {
 export type PayloadResponseType<ActionType extends RDKIT_WORKER_ACTIONS_TYPE> = ActionType extends
   | 'GET_SVG'
   | 'GET_SVG_FROM_SMARTS'
-  ? { svg: string | null }
+  ? GetSVGOutputType
   : ActionType extends 'IS_CHIRAL'
-  ? boolean
+  ? IsChiralOutputType
   : ActionType extends 'GET_MORGAN_FP'
-  ? string
+  ? GetMorganFpOutputType
   : ActionType extends 'IS_VALID_SMILES' | 'IS_VALID_SMARTS' | 'IS_VALID_MOLBLOCK'
-  ? { isValid: boolean }
+  ? IsValidOutputType
   : ActionType extends 'GET_CANONICAL_FORM_FOR_STRUCTURE'
-  ? { canonicalForm: string | null }
+  ? GetCanonicalFormOutputType
   : ActionType extends 'HAS_MATCHING_SUBSTRUCTURE'
-  ? { matching: boolean }
+  ? HasMatchingOutputType
   : ActionType extends 'GET_SUBSTRUCTURE_MATCH'
-  ? { matchingAtoms: number[]; matchingBonds: number[] } | null
+  ? GetSubstructureMatchOutputType
   : ActionType extends 'GET_MOLECULE_DETAILS'
-  ? Descriptors | null
+  ? GetMoleculeDetailsOutputType
   : ActionType extends 'DEPRECATED_GET_MOLECULE_DETAILS'
-  ? DeprecatedMoleculeBasicDetails | null
+  ? Deprecated_GetMoleculeDetailsOutputType
   : ActionType extends 'CONVERT_MOL_NOTATION'
-  ? { structure: string | null }
+  ? ConvertMolNotationOutputType
   : ActionType extends 'REMOVE_HS' | 'ADD_HS' | 'GET_NEW_COORDS'
-  ? { mdl: string | null }
+  ? GetMDLOutputType
   : ActionType extends 'GET_STEREO_TAGS'
-  ? { CIP_atoms: CIPAtoms; CIP_bonds: CIPBonds }
+  ? GetSteroTagsOutputType
   : never;
