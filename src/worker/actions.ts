@@ -30,6 +30,7 @@ export const RDKIT_WORKER_ACTIONS = {
   LOCAL_RESPONSE: 'LOCAL_RESPONSE',
   BROADCASTED_RESPONSE: 'BROADCASTED_RESPONSE',
   IS_CHIRAL: 'IS_CHIRAL',
+  GET_MORGAN_FP: 'GET_MORGAN_FP',
   GET_SVG: 'GET_SVG',
   GET_SVG_FROM_SMARTS: 'GET_SVG_FROM_SMARTS',
   GET_MOLECULE_DETAILS: 'GET_MOLECULE_DETAILS',
@@ -71,6 +72,11 @@ export type WorkerMessageNarrower =
       actionType: 'IS_CHIRAL';
       key: string;
       payload: { smiles: string };
+    }
+  | {
+      actionType: 'GET_MORGAN_FP';
+      key: string;
+      payload: { smiles: string; options?: { radius?: number; nBits?: number; len?: number } };
     }
   | {
       actionType: 'GET_SVG';

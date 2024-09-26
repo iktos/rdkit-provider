@@ -104,6 +104,18 @@ export const isChiral = (worker: Worker, { smiles }: { smiles: string }) => {
   }).then((msg) => msg.payload as PayloadResponseType<'IS_CHIRAL'>);
 };
 
+export const getMorganFp = (
+  worker: Worker,
+  params: { smiles: string; options?: { radius?: number; nBits?: number; len?: number } },
+) => {
+  const key = params.smiles;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.GET_MORGAN_FP,
+    key: key,
+    payload: params,
+  }).then((msg) => msg.payload as PayloadResponseType<'GET_MORGAN_FP'>);
+};
+
 export const isValidSmiles = (worker: Worker, { smiles }: { smiles: string }) => {
   const key = smiles;
   return postWorkerJob(worker, {
