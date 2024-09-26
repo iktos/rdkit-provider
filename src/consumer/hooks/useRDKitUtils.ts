@@ -36,6 +36,7 @@ import {
   removeHs,
   getStereoTags,
   isChiral,
+  getMorganFp,
 } from '../actions';
 import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 
@@ -82,6 +83,13 @@ export const useRDKitUtils = () => {
       async (params: ActionWorkerMessageNarrowerApplier<'IS_CHIRAL'>['payload']) => {
         if (!worker) return rejectForWorkerNotInitted();
         return isChiral(worker, params);
+      },
+      [worker],
+    ),
+    getMorganFp: useCallback(
+      async (params: ActionWorkerMessageNarrowerApplier<'GET_MORGAN_FP'>['payload']) => {
+        if (!worker) return rejectForWorkerNotInitted();
+        return getMorganFp(worker, params);
       },
       [worker],
     ),

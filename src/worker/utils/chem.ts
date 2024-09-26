@@ -127,6 +127,28 @@ export const isChiral = (smiles: string): boolean => {
   }
 };
 
+export const getMorganFp = ({
+  smiles,
+  options,
+}: {
+  smiles: string;
+  options?: { radius?: number; nBits?: number; len?: number };
+}): string => {
+  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  if (!mol) {
+    throw new Error('@iktos-oss/rdkit-provider: Failed to instanciate molecule');
+  }
+
+  try {
+    if (options) {
+      return mol.get_morgan_fp(JSON.stringify(options));
+    }
+    return mol.get_morgan_fp();
+  } finally {
+    release_molecule(mol);
+  }
+};
+
 export const isValidSmiles = (smiles: string): boolean => {
   if (!smiles) return false;
   const mol = get_molecule(smiles, globalThis.workerRDKit);
