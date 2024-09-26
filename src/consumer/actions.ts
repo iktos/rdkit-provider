@@ -95,6 +95,15 @@ export const getCanonicalFormForStructure = (
   }).then((msg) => msg.payload as PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>);
 };
 
+export const isChiral = (worker: Worker, { smiles }: { smiles: string }) => {
+  const key = smiles;
+  return postWorkerJob(worker, {
+    actionType: RDKIT_WORKER_ACTIONS.IS_CHIRAL,
+    key: key,
+    payload: { smiles },
+  }).then((msg) => msg.payload as PayloadResponseType<'IS_CHIRAL'>);
+};
+
 export const isValidSmiles = (worker: Worker, { smiles }: { smiles: string }) => {
   const key = smiles;
   return postWorkerJob(worker, {
