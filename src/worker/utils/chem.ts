@@ -208,13 +208,19 @@ export const convertMolNotation = ({
   moleculeString,
   targetNotation,
   sourceNotation,
-  useQMol = false,
+  useQMol,
 }: {
   moleculeString: string;
   targetNotation: MolNotation;
   sourceNotation?: SourceMolNotation;
   useQMol?: boolean;
 }): string | null => {
+  if (useQMol === undefined && sourceNotation === 'smarts') {
+    useQMol = true;
+  } else {
+    useQMol = false;
+  }
+
   if (sourceNotation != null) {
     if (sourceNotation === targetNotation)
       throw new Error('@iktos-oss/rdkit-provider: source and target notations must differ');
