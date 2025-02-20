@@ -217,8 +217,6 @@ export const convertMolNotation = ({
 }): string | null => {
   if (useQMol === undefined && sourceNotation === 'smarts') {
     useQMol = true;
-  } else {
-    useQMol = false;
   }
 
   if (sourceNotation != null) {
