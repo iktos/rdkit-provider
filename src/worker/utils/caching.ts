@@ -26,53 +26,68 @@ import { JSMol } from '@rdkit/rdkit';
 
 type MolType = 'mol' | 'qmol';
 
-const stroeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType: MolType) => {
+const storeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType: MolType) => {
   if (
     !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
     !globalThis.rdkitWorkerGlobals.jsMolCache ||
     !globalThis.rdkitWorkerGlobals.jsQMolCache
   )
     return;
-  if (molType == 'mol') {
+  if (molType === 'mol') {
     globalThis.rdkitWorkerGlobals.jsMolCache[structure] = jsMol;
   }
-  if (molType == 'qmol') {
+  if (molType === 'qmol') {
     globalThis.rdkitWorkerGlobals.jsQMolCache[structure] = jsMol;
   }
 };
 
-/**
- * Store JSMol object in global jsMolCache & jsQMolCache
- * @param structure can be a smiles, smarts or molblock...
- * @param jsMol can be a mol or qmol
- */
-export const storeJSMolInCache = (structure: string, jsMol: JSMol, molType: MolType) => {
+export const storeJSMolsInCache = (molsToStore: { structure: string; jsMol: JSMol | null; molType: MolType }[]) => {
   if (
     !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
     (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
-  )
+  ) {
     return;
+  }
+
   const nbCachedMolecules = globalThis.rdkitWorkerGlobals.jsMolCache
     ? Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length
     : 0;
   const nbCachedQMolecules = globalThis.rdkitWorkerGlobals.jsQMolCache
     ? Object.keys(globalThis.rdkitWorkerGlobals.jsQMolCache).length
     : 0;
-  if (nbCachedMolecules + nbCachedQMolecules > globalThis.rdkitWorkerGlobals.maxJsMolsCached) {
-    cleanMolCache();
-    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
-    return;
+
+  const validMolsToStore = molsToStore.filter((mol) => mol.jsMol !== null);
+  const molsToAdd = validMolsToStore.filter((mol) => mol.molType === 'mol').length;
+  const qmolsToAdd = validMolsToStore.filter((mol) => mol.molType === 'qmol').length;
+
+  const maxJsMolsCached = globalThis.rdkitWorkerGlobals.maxJsMolsCached;
+  const willExceedMols = nbCachedMolecules + molsToAdd > maxJsMolsCached;
+  const willExceedQMols = nbCachedQMolecules + qmolsToAdd > maxJsMolsCached;
+
+  if (willExceedMols) {
+    cleanMolsCache();
   }
-  try {
-    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
-  } catch (e) {
-    console.error(e);
-    cleanMolCache();
-    stroeMolInCacheBasedOnMolType(structure, jsMol, molType);
+  if (willExceedQMols) {
+    cleanQMolsCache();
+  }
+
+  for (const { structure, jsMol, molType } of validMolsToStore) {
+    if (!jsMol) continue;
+    try {
+      storeMolInCacheBasedOnMolType(structure, jsMol, molType);
+    } catch (e) {
+      console.error(e);
+      if (molType === 'mol') {
+        cleanMolsCache();
+      } else {
+        cleanQMolsCache();
+      }
+      storeMolInCacheBasedOnMolType(structure, jsMol, molType);
+    }
   }
 };
 
-export const getJSMolFromCache = (structure: string, molType: MolType) => {
+const getJSMolFromCache = (structure: string, molType: MolType) => {
   if (
     !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
     (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
@@ -80,13 +95,13 @@ export const getJSMolFromCache = (structure: string, molType: MolType) => {
     return null;
   }
 
-  if (molType == 'mol') {
+  if (molType === 'mol') {
     if (!globalThis.rdkitWorkerGlobals.jsMolCache) {
       return null;
     }
     return globalThis.rdkitWorkerGlobals.jsMolCache[structure];
   }
-  if (molType == 'qmol') {
+  if (molType === 'qmol') {
     if (!globalThis.rdkitWorkerGlobals.jsQMolCache) {
       return null;
     }
@@ -96,7 +111,11 @@ export const getJSMolFromCache = (structure: string, molType: MolType) => {
   throw new Error(`@iktos-oss/rdkit-provider unkown molType=${molType} passed to getJSMolFromCache`);
 };
 
-export const cleanMolCache = () => {
+export const getJSMolsFromCache = (structures: string[], molType: MolType) => {
+  return structures.map((struct) => getJSMolFromCache(struct, molType));
+};
+
+const cleanMolsCache = () => {
   if (globalThis.rdkitWorkerGlobals?.jsMolCache) {
     for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsMolCache)) {
       try {
@@ -107,6 +126,9 @@ export const cleanMolCache = () => {
       }
     }
   }
+};
+
+const cleanQMolsCache = () => {
   if (globalThis.rdkitWorkerGlobals?.jsQMolCache) {
     for (const [structure, mol] of Object.entries(globalThis.rdkitWorkerGlobals.jsQMolCache)) {
       try {
@@ -117,6 +139,11 @@ export const cleanMolCache = () => {
       }
     }
   }
+};
+
+export const cleanMolCache = () => {
+  cleanMolsCache();
+  cleanQMolsCache();
 };
 
 export const cleanAllCache = () => {
