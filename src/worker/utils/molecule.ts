@@ -23,65 +23,95 @@
 */
 
 import { JSMol, RDKitModule } from '@rdkit/rdkit';
-import { cleanMolCache, getJSMolFromCache, storeJSMolInCache } from './caching';
+import { cleanMolCache, getJSMolsFromCache, storeJSMolsInCache } from './caching';
 
-const get_molecule_memory_unsafe = (smiles: string, RDKit: RDKitModule) => {
-  const cachedMolecule = getJSMolFromCache(smiles, 'mol');
-  if (cachedMolecule) return cachedMolecule;
-  if (!smiles) return null;
-  if (!RDKit) return null;
-
+const createMol = (smiles: string, RDKit: RDKitModule) => {
   const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
   const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
   if (!mol) {
     console.error('@iktos-oss/rdkit-provider: failed to get mol for smiles = ', smiles);
     return null;
   }
-
-  storeJSMolInCache(smiles, mol, 'mol');
   return mol;
 };
 
-export const get_molecule = (smiles: string, RDKit: RDKitModule) => {
+const createQMol = (smarts: string, RDKit: RDKitModule) => {
+  const qmol = RDKit.get_qmol(smarts);
+  if (!qmol) {
+    console.error('@iktos-oss/rdkit-provider: failed to get qmol for structure =', smarts);
+    return null;
+  }
+  return qmol;
+};
+
+const get_molecules_memory_unsafe = (listOfSmiles: string[], RDKit: RDKitModule) => {
+  if (!RDKit) return [];
+  const cachedMolecules = getJSMolsFromCache(listOfSmiles, 'mol');
+  const mols = cachedMolecules.map((cachedMol, idx) => {
+    if (cachedMol) {
+      return cachedMol;
+    }
+
+    return createMol(listOfSmiles[idx], RDKit);
+  });
+  storeJSMolsInCache(
+    mols.map((jsMol, idx) => ({
+      structure: listOfSmiles[idx],
+      jsMol,
+      molType: 'mol',
+    })),
+  );
+
+  return mols;
+};
+
+export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule) => {
   try {
-    return get_molecule_memory_unsafe(smiles, RDKit);
+    return get_molecules_memory_unsafe(listOfSmiles, RDKit);
   } catch (e) {
     // clean cache on possible Runtimeerror OOM
     console.error(e);
     cleanMolCache();
-    return get_molecule_memory_unsafe(smiles, RDKit);
+    return get_molecules_memory_unsafe(listOfSmiles, RDKit);
   }
 };
 
-const get_query_molecule_memory_unsafe = (structure: string, RDKit: RDKitModule) => {
-  const cachedQMolecule = getJSMolFromCache(structure, 'qmol');
-  if (cachedQMolecule) return cachedQMolecule;
-  if (!structure) return null;
-  if (!RDKit) return null;
+const get_query_molecules_memory_unsafe = (listOfSmarts: string[], RDKit: RDKitModule) => {
+  if (!RDKit) return [];
+  const cachedQMolecules = getJSMolsFromCache(listOfSmarts, 'qmol');
+  const qmols = cachedQMolecules.map((cachedQMol, idx) => {
+    if (cachedQMol) {
+      return cachedQMol;
+    }
 
-  const qmol = RDKit.get_qmol(structure);
-  if (!qmol) {
-    console.error('@iktos-oss/rdkit-provider: failed to get qmol for structure =', structure);
-    return null;
-  }
+    return createQMol(listOfSmarts[idx], RDKit);
+  });
 
-  storeJSMolInCache(structure, qmol, 'qmol');
-  return qmol;
+  storeJSMolsInCache(
+    qmols.map((jsMol, idx) => ({
+      structure: listOfSmarts[idx],
+      jsMol,
+      molType: 'qmol',
+    })),
+  );
+  return qmols;
 };
 
-export const get_query_molecule = (structure: string, RDKit: RDKitModule) => {
+export const get_query_molecules = (listOfSmarts: string[], RDKit: RDKitModule) => {
   try {
-    return get_query_molecule_memory_unsafe(structure, RDKit);
+    return get_query_molecules_memory_unsafe(listOfSmarts, RDKit);
   } catch (e) {
     console.error(e);
     cleanMolCache();
-    return get_query_molecule_memory_unsafe(structure, RDKit);
+    return get_query_molecules_memory_unsafe(listOfSmarts, RDKit);
   }
 };
 
-export const release_molecule = (mol: JSMol) => {
+export const release_molecules = (mols: Array<JSMol | null>) => {
   // to be called after every jsMol instanciation via get_molecule call
-  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled && mol) {
-    mol.delete();
+  if (!globalThis.rdkitWorkerGlobals.jsMolCacheEnabled) {
+    for (const mol of mols) {
+      mol?.delete();
+    }
   }
 };
