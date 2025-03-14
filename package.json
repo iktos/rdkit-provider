@@ -1,6 +1,6 @@
 {
   "name": "@iktos-oss/rdkit-provider",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "exports an initialized RDKit instance, with helper functions",
   "main": "lib/cjs/src/index.js",
   "module": "lib/esm/src/index.js",
