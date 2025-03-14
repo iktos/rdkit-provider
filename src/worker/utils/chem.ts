@@ -23,7 +23,7 @@
 */
 
 import { RDKitColor } from '../../types';
-import { get_molecule, get_query_molecule, release_molecule } from './molecule';
+import { get_molecules, get_query_molecules, release_molecules } from './molecule';
 
 import { CIPAtoms, CIPBonds } from '../types';
 
@@ -36,33 +36,40 @@ export const getSvg = ({
   drawingDetails?: DrawingDetails;
   alignmentDetails?: AlignmentDetails;
 }) => {
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  const molecules = alignmentDetails
+    ? get_molecules([smiles, alignmentDetails.molBlock], globalThis.workerRDKit)
+    : get_molecules([smiles], globalThis.workerRDKit);
+
+  const [mol] = molecules;
   if (!mol) return null;
+
   if (alignmentDetails) {
-    const molToAlignWith = get_molecule(alignmentDetails.molBlock, globalThis.workerRDKit);
+    const [_, molToAlignWith] = molecules;
     if (!molToAlignWith) return null;
+
     mol.generate_aligned_coords(
       molToAlignWith,
       JSON.stringify({ useCoordGen: globalThis.rdkitWorkerGlobals.preferCoordgen }),
     );
-    release_molecule(molToAlignWith);
   }
+
   const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
   const svg = mol.get_svg_with_highlights(drawingDetailsStringifyed);
+
+  // reset coords if alignment was used (mol could be in cache)
   if (alignmentDetails) {
-    // reset coords as mol could be in cache
     mol.set_new_coords();
   }
-  release_molecule(mol);
+
+  release_molecules(molecules);
   return svg;
 };
-
 export const getSvgFromSmarts = ({ smarts, width, height }: { smarts: string; width: number; height: number }) => {
-  const smartsMol = get_query_molecule(smarts, globalThis.workerRDKit);
+  const [smartsMol] = get_query_molecules([smarts], globalThis.workerRDKit);
   if (!smartsMol) return null;
 
   const svg = smartsMol.get_svg(width, height);
-  release_molecule(smartsMol);
+  release_molecules([smartsMol]);
   return svg;
 };
 
@@ -79,10 +86,10 @@ export function getMoleculeDetails(params: {
   returnFullDetails: false;
 }): DeprecatedMoleculeBasicDetails | null;
 export function getMoleculeDetails({ smiles, returnFullDetails }: { smiles: string; returnFullDetails: boolean }) {
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  const [mol] = get_molecules([smiles], globalThis.workerRDKit);
   if (!mol) return null;
   const details = JSON.parse(mol.get_descriptors());
-  release_molecule(mol);
+  release_molecules([mol]);
 
   if (returnFullDetails) {
     return details as MoleculeFullDetails;
@@ -111,7 +118,7 @@ export const getCanonicalFormForStructure = ({
 };
 
 export const isChiral = (smiles: string): boolean => {
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  const [mol] = get_molecules([smiles], globalThis.workerRDKit);
   if (!mol) {
     throw new Error('@iktos-oss/rdkit-provider: Failed to instanciate molecule');
   }
@@ -123,7 +130,7 @@ export const isChiral = (smiles: string): boolean => {
     const chiralSmiles = mol.get_smiles(JSON.stringify({ doIsomericSmiles: true }));
     return achiralSmiles !== chiralSmiles;
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
@@ -134,7 +141,7 @@ export const getMorganFp = ({
   smiles: string;
   options?: { radius?: number; nBits?: number; len?: number };
 }): string => {
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  const [mol] = get_molecules([smiles], globalThis.workerRDKit);
   if (!mol) {
     throw new Error('@iktos-oss/rdkit-provider: Failed to instanciate molecule');
   }
@@ -145,58 +152,58 @@ export const getMorganFp = ({
     }
     return mol.get_morgan_fp();
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
 export const isValidSmiles = (smiles: string): boolean => {
   if (!smiles) return false;
-  const mol = get_molecule(smiles, globalThis.workerRDKit);
+  const [mol] = get_molecules([smiles], globalThis.workerRDKit);
   if (!mol) return false;
   const isValid = mol.is_valid();
-  release_molecule(mol);
+  release_molecules([mol]);
   return isValid;
 };
 
 export const isValidSmarts = (smarts: string): boolean => {
   if (!smarts) return false;
-  const mol = get_query_molecule(smarts, globalThis.workerRDKit);
+  const [mol] = get_query_molecules([smarts], globalThis.workerRDKit);
   if (!mol) return false;
 
   const isValid = mol.is_valid();
-  release_molecule(mol);
+  release_molecules([mol]);
   return isValid;
 };
 
 export const hasMatchingSubstructure = ({ smiles, substructure }: { smiles: string; substructure: string }) => {
-  const smilesMol = get_molecule(smiles, globalThis.workerRDKit);
-  const smartsMol = get_query_molecule(substructure, globalThis.workerRDKit);
+  const [smilesMol] = get_molecules([smiles], globalThis.workerRDKit);
+  const [smartsMol] = get_query_molecules([substructure], globalThis.workerRDKit);
   if (!smilesMol || !smartsMol) return false;
   const substructureMatchDetails = JSON.parse(smilesMol.get_substruct_match(smartsMol));
   const matchDetailsNotEmpty = !!substructureMatchDetails && !!Object.keys(substructureMatchDetails).length;
 
+  release_molecules([smilesMol, smartsMol]);
   return matchDetailsNotEmpty;
 };
 
 export const getMatchingSubstructure = ({ structure, substructure }: { structure: string; substructure: string }) => {
-  const mol = get_molecule(structure, globalThis.workerRDKit);
-  const molToMach = get_query_molecule(substructure, globalThis.workerRDKit);
+  const [mol] = get_molecules([structure], globalThis.workerRDKit);
+  const [molToMach] = get_query_molecules([substructure], globalThis.workerRDKit);
   if (!mol || !molToMach) return null;
   const { atoms, bonds } = JSON.parse(mol.get_substruct_match(molToMach)) as { atoms: number[]; bonds: number[] };
-  release_molecule(mol);
-  release_molecule(molToMach);
+  release_molecules([mol, molToMach]);
 
   return { matchingAtoms: atoms, matchingBonds: bonds };
 };
 
 export const isValidMolBlock = (mdl: string) => {
   if (!mdl.includes('M  END')) return false;
-  const mol = get_molecule(mdl, globalThis.workerRDKit);
+  const [mol] = get_molecules([mdl], globalThis.workerRDKit);
   if (!mol) return false;
   try {
     return mol.is_valid();
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
@@ -225,9 +232,9 @@ export const convertMolNotation = ({
     if (!_validateSource(moleculeString, sourceNotation))
       throw new Error('@iktos-oss/rdkit-provider: molecule string not valid');
   }
-  const mol = useQMol
-    ? get_query_molecule(moleculeString, globalThis.workerRDKit)
-    : get_molecule(moleculeString, globalThis.workerRDKit);
+  const [mol] = useQMol
+    ? get_query_molecules([moleculeString], globalThis.workerRDKit)
+    : get_molecules([moleculeString], globalThis.workerRDKit);
   if (!mol) return null;
   try {
     return mol[`get_${targetNotation}`]();
@@ -235,34 +242,34 @@ export const convertMolNotation = ({
     console.error(e);
     throw new Error('@iktos-oss/rdkit-provider: target notation not implemented');
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
 export const getNewCoords = (structure: string, useCoordGen?: boolean) => {
-  const mol = get_molecule(structure, globalThis.workerRDKit);
+  const [mol] = get_molecules([structure], globalThis.workerRDKit);
   if (!mol) return null;
   try {
     const mdl = useCoordGen !== undefined ? mol.get_new_coords(useCoordGen) : mol.get_new_coords();
     return mdl;
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
 export const removeHs = (structure: string) => {
-  const mol = get_molecule(structure, globalThis.workerRDKit);
+  const [mol] = get_molecules([structure], globalThis.workerRDKit);
   if (!mol) return null;
   try {
     const mdl = mol.remove_hs();
     return getNewCoords(mdl, false);
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
 export const addHs = (structure: string) => {
-  const mol = get_molecule(structure, globalThis.workerRDKit);
+  const [mol] = get_molecules([structure], globalThis.workerRDKit);
   if (!mol) return null;
 
   try {
@@ -271,12 +278,12 @@ export const addHs = (structure: string) => {
 
     return mdl;
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
 export const getStereoTags = (structure: string) => {
-  const mol = get_molecule(structure, globalThis.workerRDKit);
+  const [mol] = get_molecules([structure], globalThis.workerRDKit);
   if (!mol) throw new Error('@iktos-oss/rdkit-provider: mol is null');
 
   try {
@@ -291,7 +298,7 @@ export const getStereoTags = (structure: string) => {
     console.error(e);
     throw new Error('@iktos-oss/rdkit-provider: could not get stereo tags');
   } finally {
-    release_molecule(mol);
+    release_molecules([mol]);
   }
 };
 
