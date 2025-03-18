@@ -23,7 +23,7 @@
 */
 
 import { JSMol, RDKitModule } from '@rdkit/rdkit';
-import { cleanMolCache, getJSMolsFromCache, storeJSMolsInCache } from './caching';
+import { cleanMolCache, clearCacheIfWillOverflow, getJSMolsFromCache, storeJSMolsInCache } from './caching';
 
 const createMol = (smiles: string, RDKit: RDKitModule) => {
   const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
@@ -46,6 +46,7 @@ const createQMol = (smarts: string, RDKit: RDKitModule) => {
 
 const get_molecules_memory_unsafe = (listOfSmiles: string[], RDKit: RDKitModule) => {
   if (!RDKit) return [];
+  clearCacheIfWillOverflow({ nbMols: listOfSmiles.length, nbQmols: 0 });
   const cachedMolecules = getJSMolsFromCache(listOfSmiles, 'mol');
   const mols = cachedMolecules.map((cachedMol, idx) => {
     if (cachedMol) {
@@ -70,7 +71,8 @@ export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule) => {
     return get_molecules_memory_unsafe(listOfSmiles, RDKit);
   } catch (e) {
     // clean cache on possible Runtimeerror OOM
-    console.error(e);
+    console.error('@iktos-oss/rdkit-provider: caught error during get_molecules', e);
+    console.info('@iktos-oss/rdkit-provider: clearing cache');
     cleanMolCache();
     return get_molecules_memory_unsafe(listOfSmiles, RDKit);
   }
@@ -78,6 +80,7 @@ export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule) => {
 
 const get_query_molecules_memory_unsafe = (listOfSmarts: string[], RDKit: RDKitModule) => {
   if (!RDKit) return [];
+  clearCacheIfWillOverflow({ nbMols: 0, nbQmols: listOfSmarts.length });
   const cachedQMolecules = getJSMolsFromCache(listOfSmarts, 'qmol');
   const qmols = cachedQMolecules.map((cachedQMol, idx) => {
     if (cachedQMol) {

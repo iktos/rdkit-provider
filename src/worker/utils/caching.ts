@@ -41,14 +41,13 @@ const storeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType:
   }
 };
 
-export const storeJSMolsInCache = (molsToStore: { structure: string; jsMol: JSMol | null; molType: MolType }[]) => {
-  if (
-    !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
-    (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
-  ) {
-    return;
-  }
+interface MolsToCache {
+  structure: string;
+  jsMol: JSMol | null;
+  molType: MolType;
+}
 
+export const clearCacheIfWillOverflow = ({ nbMols, nbQmols }: { nbMols: number; nbQmols: number }) => {
   const nbCachedMolecules = globalThis.rdkitWorkerGlobals.jsMolCache
     ? Object.keys(globalThis.rdkitWorkerGlobals.jsMolCache).length
     : 0;
@@ -56,13 +55,9 @@ export const storeJSMolsInCache = (molsToStore: { structure: string; jsMol: JSMo
     ? Object.keys(globalThis.rdkitWorkerGlobals.jsQMolCache).length
     : 0;
 
-  const validMolsToStore = molsToStore.filter((mol) => mol.jsMol !== null);
-  const molsToAdd = validMolsToStore.filter((mol) => mol.molType === 'mol').length;
-  const qmolsToAdd = validMolsToStore.filter((mol) => mol.molType === 'qmol').length;
-
   const maxJsMolsCached = globalThis.rdkitWorkerGlobals.maxJsMolsCached;
-  const willExceedMols = nbCachedMolecules + molsToAdd > maxJsMolsCached;
-  const willExceedQMols = nbCachedQMolecules + qmolsToAdd > maxJsMolsCached;
+  const willExceedMols = nbCachedMolecules + nbMols > maxJsMolsCached;
+  const willExceedQMols = nbCachedQMolecules + nbQmols > maxJsMolsCached;
 
   if (willExceedMols) {
     cleanMolsCache();
@@ -70,19 +65,28 @@ export const storeJSMolsInCache = (molsToStore: { structure: string; jsMol: JSMo
   if (willExceedQMols) {
     cleanQMolsCache();
   }
+};
 
-  for (const { structure, jsMol, molType } of validMolsToStore) {
+export const storeJSMolsInCache = (molsToStore: MolsToCache[]) => {
+  if (
+    !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
+    (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
+  ) {
+    return;
+  }
+
+  for (const { structure, jsMol, molType } of molsToStore) {
     if (!jsMol) continue;
     try {
       storeMolInCacheBasedOnMolType(structure, jsMol, molType);
     } catch (e) {
-      console.error(e);
+      console.error('@iktos-oss/rdkit-provider: failed while storing molecules in cahce', e);
+      console.info('@iktos-oss/rdkit-provider: clearing cache');
       if (molType === 'mol') {
         cleanMolsCache();
       } else {
         cleanQMolsCache();
       }
-      storeMolInCacheBasedOnMolType(structure, jsMol, molType);
     }
   }
 };
