@@ -222,9 +222,7 @@ export const convertMolNotation = ({
   sourceNotation?: SourceMolNotation;
   useQMol?: boolean;
 }): string | null => {
-  if (useQMol === undefined && sourceNotation === 'smarts') {
-    useQMol = true;
-  }
+  const shouldUseSmarts = !!useQMol || (useQMol === undefined && sourceNotation === 'smarts');
 
   if (sourceNotation != null) {
     if (sourceNotation === targetNotation)
@@ -232,7 +230,7 @@ export const convertMolNotation = ({
     if (!_validateSource(moleculeString, sourceNotation))
       throw new Error('@iktos-oss/rdkit-provider: molecule string not valid');
   }
-  const [mol] = useQMol
+  const [mol] = shouldUseSmarts
     ? get_query_molecules([moleculeString], globalThis.workerRDKit)
     : get_molecules([moleculeString], globalThis.workerRDKit);
   if (!mol) return null;
@@ -309,7 +307,7 @@ const _validateSource = (structure: string, sourceNotation: SourceMolNotation) =
     case 'smiles':
       return isValidSmiles(structure);
     case 'smarts':
-      return isValidSmiles(structure);
+      return isValidSmarts(structure);
     default:
       throw new Error(`@iktos-oss/rdkit-provider: validate ${sourceNotation} not implemented`);
   }

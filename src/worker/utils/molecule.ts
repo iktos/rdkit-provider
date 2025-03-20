@@ -67,6 +67,7 @@ const get_molecules_memory_unsafe = (listOfSmiles: string[], RDKit: RDKitModule)
 };
 
 export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule) => {
+  console.log('called get_molecules');
   try {
     return get_molecules_memory_unsafe(listOfSmiles, RDKit);
   } catch (e) {
@@ -82,11 +83,13 @@ const get_query_molecules_memory_unsafe = (listOfSmarts: string[], RDKit: RDKitM
   if (!RDKit) return [];
   clearCacheIfWillOverflow({ nbMols: 0, nbQmols: listOfSmarts.length });
   const cachedQMolecules = getJSMolsFromCache(listOfSmarts, 'qmol');
+  console.log('cachedQMolecules', cachedQMolecules);
   const qmols = cachedQMolecules.map((cachedQMol, idx) => {
     if (cachedQMol) {
       return cachedQMol;
     }
 
+    console.log('about to call createQMol');
     return createQMol(listOfSmarts[idx], RDKit);
   });
 
@@ -101,6 +104,7 @@ const get_query_molecules_memory_unsafe = (listOfSmarts: string[], RDKit: RDKitM
 };
 
 export const get_query_molecules = (listOfSmarts: string[], RDKit: RDKitModule) => {
+  console.log('called get_query_molecules');
   try {
     return get_query_molecules_memory_unsafe(listOfSmarts, RDKit);
   } catch (e) {
