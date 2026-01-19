@@ -61,11 +61,13 @@ export const getSvg = ({
   } else {
     // Explicitly generate new coords with preferCoordgen setting
     // This ensures coordgen is used even without alignment
-    console.log(
-      '[rdkit-provider:getSvg] using set_new_coords with preferCoordgen:',
-      globalThis.rdkitWorkerGlobals.preferCoordgen,
-    );
-    mol.set_new_coords(globalThis.rdkitWorkerGlobals.preferCoordgen);
+    const coordsBefore = mol.get_molblock().slice(0, 200);
+    const result = mol.set_new_coords(globalThis.rdkitWorkerGlobals.preferCoordgen);
+    const coordsAfter = mol.get_molblock().slice(0, 200);
+    console.log('[rdkit-provider:getSvg] set_new_coords result:', result);
+    console.log('[rdkit-provider:getSvg] preferCoordgen:', globalThis.rdkitWorkerGlobals.preferCoordgen);
+    console.log('[rdkit-provider:getSvg] coordsBefore:', coordsBefore);
+    console.log('[rdkit-provider:getSvg] coordsAfter:', coordsAfter);
   }
 
   const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
@@ -235,6 +237,14 @@ export const convertMolNotation = ({
   sourceNotation?: SourceMolNotation;
   useQMol?: boolean;
 }): string | null => {
+  console.log('[rdkit-provider:convertMolNotation] called with:', {
+    moleculeString: moleculeString?.slice(0, 50) + (moleculeString?.length > 50 ? '...' : ''),
+    targetNotation,
+    sourceNotation,
+    useQMol,
+    preferCoordgen: globalThis.rdkitWorkerGlobals?.preferCoordgen,
+  });
+
   const shouldUseSmarts = !!useQMol || (useQMol === undefined && sourceNotation === 'smarts');
 
   if (sourceNotation != null) {
@@ -248,7 +258,11 @@ export const convertMolNotation = ({
     : get_molecules([moleculeString], globalThis.workerRDKit);
   if (!mol) return null;
   try {
-    return mol[`get_${targetNotation}`]();
+    const result = mol[`get_${targetNotation}`]();
+    if (targetNotation === 'molblock') {
+      console.log('[rdkit-provider:convertMolNotation] molblock result (first 200 chars):', result?.slice(0, 200));
+    }
+    return result;
   } catch (e) {
     console.error(e);
     throw new Error('@iktos-oss/rdkit-provider: target notation not implemented');
