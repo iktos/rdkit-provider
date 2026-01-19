@@ -26,8 +26,14 @@ import { MAX_CACHED_JSMOLS } from '../../constants';
 import { RDKitProviderCacheOptions } from '../../contexts';
 
 export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {} }: InitWorkerOptions) => {
+  console.log('[rdkit-provider:initRdkit] called with preferCoordgen:', preferCoordgen);
   initWorkerGlobals({ cache, preferCoordgen, removeHs });
-  if (globalThis.workerRDKit) return;
+  if (globalThis.workerRDKit) {
+    // Update preferCoordgen setting even if RDKit is already initialized
+    console.log('[rdkit-provider:initRdkit] RDKit already initialized, updating prefer_coordgen to:', preferCoordgen);
+    globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
+    return;
+  }
 
   const path = rdkitPath || '/RDKit_minimal.js';
   const url = new URL(path, globalThis.origin);
@@ -35,6 +41,7 @@ export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {
   importScripts(url);
   if (!globalThis.initRDKitModule) return;
   globalThis.workerRDKit = await globalThis.initRDKitModule();
+  console.log('[rdkit-provider:initRdkit] RDKit initialized, setting prefer_coordgen to:', preferCoordgen);
   globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
 };
 

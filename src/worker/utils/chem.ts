@@ -36,6 +36,9 @@ export const getSvg = ({
   drawingDetails?: DrawingDetails;
   alignmentDetails?: AlignmentDetails;
 }) => {
+  console.log('[rdkit-provider:getSvg] preferCoordgen from globals:', globalThis.rdkitWorkerGlobals?.preferCoordgen);
+  console.log('[rdkit-provider:getSvg] hasAlignmentDetails:', !!alignmentDetails);
+
   const molecules = alignmentDetails
     ? get_molecules([smiles, alignmentDetails.molBlock], globalThis.workerRDKit)
     : get_molecules([smiles], globalThis.workerRDKit);
@@ -47,19 +50,29 @@ export const getSvg = ({
     const [_, molToAlignWith] = molecules;
     if (!molToAlignWith) return null;
 
+    console.log(
+      '[rdkit-provider:getSvg] using generate_aligned_coords with useCoordGen:',
+      globalThis.rdkitWorkerGlobals.preferCoordgen,
+    );
     mol.generate_aligned_coords(
       molToAlignWith,
       JSON.stringify({ useCoordGen: globalThis.rdkitWorkerGlobals.preferCoordgen }),
     );
+  } else {
+    // Explicitly generate new coords with preferCoordgen setting
+    // This ensures coordgen is used even without alignment
+    console.log(
+      '[rdkit-provider:getSvg] using set_new_coords with preferCoordgen:',
+      globalThis.rdkitWorkerGlobals.preferCoordgen,
+    );
+    mol.set_new_coords(globalThis.rdkitWorkerGlobals.preferCoordgen);
   }
 
   const drawingDetailsStringifyed = drawingDetails ? JSON.stringify(drawingDetails) : '';
   const svg = mol.get_svg_with_highlights(drawingDetailsStringifyed);
 
-  if (alignmentDetails) {
-    // reset coords if alignment was used (mol could be in cache)
-    mol.set_new_coords();
-  }
+  // Reset coords since mol could be in cache (avoid mutating cached coordinates)
+  mol.set_new_coords();
 
   release_molecules(molecules);
   return svg;
