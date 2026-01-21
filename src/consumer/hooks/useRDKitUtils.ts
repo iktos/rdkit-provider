@@ -22,7 +22,6 @@
   SOFTWARE.
 */
 
-import { useCallback } from 'react';
 import {
   addHs,
   convertMolNotation,
@@ -43,8 +42,63 @@ import { ActionWorkerMessageNarrowerApplier } from '../../worker/actions';
 import { useRDKit } from '../../hooks/useRDKit';
 import { PayloadResponseType } from '../../worker/worker';
 
-export const useRDKitUtils = () => {
+type RDKitUtilsReady = {
+  isReady: true;
+  isValidSmiles: (
+    params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMILES'>['payload'],
+  ) => Promise<PayloadResponseType<'IS_VALID_SMILES'>>;
+  isValidSmarts: (
+    params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMARTS'>['payload'],
+  ) => Promise<PayloadResponseType<'IS_VALID_SMARTS'>>;
+  isChiral: (
+    params: ActionWorkerMessageNarrowerApplier<'IS_CHIRAL'>['payload'],
+  ) => Promise<PayloadResponseType<'IS_CHIRAL'>>;
+  getMorganFp: (
+    params: ActionWorkerMessageNarrowerApplier<'GET_MORGAN_FP'>['payload'],
+  ) => Promise<PayloadResponseType<'GET_MORGAN_FP'>>;
+  hasMatchingSubstructure: (
+    params: ActionWorkerMessageNarrowerApplier<'HAS_MATCHING_SUBSTRUCTURE'>['payload'],
+  ) => Promise<PayloadResponseType<'HAS_MATCHING_SUBSTRUCTURE'>>;
+  getMoleculeDetails: {
+    (params: { smiles: string; returnFullDetails: true }): Promise<PayloadResponseType<'GET_MOLECULE_DETAILS'>>;
+    (params: { smiles: string; returnFullDetails?: false | undefined }): Promise<
+      PayloadResponseType<'DEPRECATED_GET_MOLECULE_DETAILS'>
+    >;
+  };
+  getSvg: (params: ActionWorkerMessageNarrowerApplier<'GET_SVG'>['payload']) => Promise<PayloadResponseType<'GET_SVG'>>;
+  isValidMolblock: (
+    params: ActionWorkerMessageNarrowerApplier<'IS_VALID_MOLBLOCK'>['payload'],
+  ) => Promise<PayloadResponseType<'IS_VALID_MOLBLOCK'>>;
+  convertMolNotation: (
+    params: ActionWorkerMessageNarrowerApplier<'CONVERT_MOL_NOTATION'>['payload'],
+  ) => Promise<PayloadResponseType<'CONVERT_MOL_NOTATION'>>;
+  addHs: (params: ActionWorkerMessageNarrowerApplier<'ADD_HS'>['payload']) => Promise<PayloadResponseType<'ADD_HS'>>;
+  removeHs: (
+    params: ActionWorkerMessageNarrowerApplier<'REMOVE_HS'>['payload'],
+  ) => Promise<PayloadResponseType<'REMOVE_HS'>>;
+  getNewCoords: (
+    params: ActionWorkerMessageNarrowerApplier<'GET_NEW_COORDS'>['payload'],
+  ) => Promise<PayloadResponseType<'GET_NEW_COORDS'>>;
+  getStereoTags: (
+    params: ActionWorkerMessageNarrowerApplier<'GET_STEREO_TAGS'>['payload'],
+  ) => Promise<PayloadResponseType<'GET_STEREO_TAGS'>>;
+};
+
+type RDKitUtilsNotReady = {
+  isReady: false;
+};
+
+export type RDKitUtilsResult = RDKitUtilsReady | RDKitUtilsNotReady;
+
+export const useRDKitUtils = (): RDKitUtilsResult => {
   const { worker } = useRDKit();
+
+  if (!worker) {
+    return { isReady: false };
+  }
+
+  // typeScript narrowing in closures
+  const readyWorker = worker;
 
   function getMoleculeDetails(params: {
     smiles: string;
@@ -57,102 +111,25 @@ export const useRDKitUtils = () => {
 
   function getMoleculeDetails({ smiles, returnFullDetails = false }: { smiles: string; returnFullDetails?: boolean }) {
     // returnFullDetails = false is deprecated, returnFullDetails will be removed in v3 and returnFullDetails = true will be the default behavior
-    if (!worker) return rejectForWorkerNotInitted();
-
-    // Handle different logic based on returnFullDetails flag
     return returnFullDetails
-      ? getMoleculeDetailsAction(worker, { smiles, returnFullDetails: true })
-      : getMoleculeDetailsAction(worker, { smiles, returnFullDetails: false });
+      ? getMoleculeDetailsAction(readyWorker, { smiles, returnFullDetails: true })
+      : getMoleculeDetailsAction(readyWorker, { smiles, returnFullDetails: false });
   }
+
   return {
-    isValidSmiles: useCallback(
-      async (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMILES'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return isValidSmiles(worker, params);
-      },
-      [worker],
-    ),
-    isValidSmarts: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_SMARTS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return isValidSmarts(worker, params);
-      },
-      [worker],
-    ),
-    isChiral: useCallback(
-      async (params: ActionWorkerMessageNarrowerApplier<'IS_CHIRAL'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return isChiral(worker, params);
-      },
-      [worker],
-    ),
-    getMorganFp: useCallback(
-      async (params: ActionWorkerMessageNarrowerApplier<'GET_MORGAN_FP'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getMorganFp(worker, params);
-      },
-      [worker],
-    ),
-    hasMatchingSubstructure: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'HAS_MATCHING_SUBSTRUCTURE'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return hasMatchingSubstructure(worker, params);
-      },
-      [worker],
-    ),
-    // igonring getMoleculeDetails as dependency
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    getMoleculeDetails: useCallback(getMoleculeDetails, [worker]),
-    getSvg: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'GET_SVG'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getSvg(worker, params);
-      },
-      [worker],
-    ),
-    isValidMolblock: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'IS_VALID_MOLBLOCK'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return isValidMolBlock(worker, params);
-      },
-      [worker],
-    ),
-    convertMolNotation: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'CONVERT_MOL_NOTATION'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return convertMolNotation(worker, params);
-      },
-      [worker],
-    ),
-    addHs: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'ADD_HS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return addHs(worker, params);
-      },
-      [worker],
-    ),
-    removeHs: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'REMOVE_HS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return removeHs(worker, params);
-      },
-      [worker],
-    ),
-    getNewCoords: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'GET_NEW_COORDS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getNewCoords(worker, params);
-      },
-      [worker],
-    ),
-    getStereoTags: useCallback(
-      (params: ActionWorkerMessageNarrowerApplier<'GET_STEREO_TAGS'>['payload']) => {
-        if (!worker) return rejectForWorkerNotInitted();
-        return getStereoTags(worker, params);
-      },
-      [worker],
-    ),
+    isReady: true,
+    isValidSmiles: (params) => isValidSmiles(readyWorker, params),
+    isValidSmarts: (params) => isValidSmarts(readyWorker, params),
+    isChiral: (params) => isChiral(readyWorker, params),
+    getMorganFp: (params) => getMorganFp(readyWorker, params),
+    hasMatchingSubstructure: (params) => hasMatchingSubstructure(readyWorker, params),
+    getMoleculeDetails,
+    getSvg: (params) => getSvg(readyWorker, params),
+    isValidMolblock: (params) => isValidMolBlock(readyWorker, params),
+    convertMolNotation: (params) => convertMolNotation(readyWorker, params),
+    addHs: (params) => addHs(readyWorker, params),
+    removeHs: (params) => removeHs(readyWorker, params),
+    getNewCoords: (params) => getNewCoords(readyWorker, params),
+    getStereoTags: (params) => getStereoTags(readyWorker, params),
   };
 };
-
-const rejectForWorkerNotInitted = () => Promise.reject('[@iktos-oss/rdkit-provider] rdkit worker not inited');
