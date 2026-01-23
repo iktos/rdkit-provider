@@ -27,7 +27,10 @@ import { RDKitProviderCacheOptions } from '../../contexts';
 
 export const initRdkit = async ({ rdkitPath, preferCoordgen, removeHs, cache = {} }: InitWorkerOptions) => {
   initWorkerGlobals({ cache, preferCoordgen, removeHs });
-  if (globalThis.workerRDKit) return;
+  if (globalThis.workerRDKit) {
+    globalThis.workerRDKit.prefer_coordgen(preferCoordgen);
+    return;
+  }
 
   const path = rdkitPath || '/RDKit_minimal.js';
   const url = new URL(path, globalThis.origin);
