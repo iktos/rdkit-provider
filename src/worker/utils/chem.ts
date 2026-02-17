@@ -58,7 +58,7 @@ export const getSvg = ({
 
   if (alignmentDetails) {
     // reset coords if alignment was used (mol could be in cache)
-    mol.set_new_coords();
+    mol.set_new_coords(globalThis.rdkitWorkerGlobals.preferCoordgen);
   }
 
   release_molecules(molecules);
