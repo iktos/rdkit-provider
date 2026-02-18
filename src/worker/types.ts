@@ -31,6 +31,7 @@ export interface RDKitWorkerGlobals {
   maxJsMolsCached: number;
   preferCoordgen: boolean;
   removeHs: boolean;
+  kekulize: boolean;
 }
 
 export type CIPAtoms = [idx: number, cip: string][];

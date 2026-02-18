@@ -36,6 +36,7 @@ export type RDKitProviderProps = PropsWithChildren<{
   initialWorkerInstance?: Worker;
   preferCoordgen?: boolean;
   removeHs?: boolean;
+  kekulize?: boolean;
   rdkitPath?: string;
   rdkitWorkerPublicFolder?: string;
 }>;
@@ -49,6 +50,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
   initialWorkerInstance = null,
   preferCoordgen = false,
   removeHs = true,
+  kekulize = true,
   rdkitPath,
   rdkitWorkerPublicFolder,
   children,
@@ -66,7 +68,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
       await postWorkerJob(workerInstance, {
         actionType: RDKIT_WORKER_ACTIONS.INIT_RDKIT_MODULE,
         key: 'worker-init',
-        payload: { rdkitPath, cache, preferCoordgen, removeHs },
+        payload: { rdkitPath, cache, preferCoordgen, removeHs, kekulize },
       });
 
       if (isProviderMounted && workerInstance) {
@@ -84,7 +86,7 @@ export const RDKitProvider: React.FC<RDKitProviderProps> = ({
         key: 'worker-terminate',
       });
     };
-  }, [initialWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPublicFolder, removeHs]);
+  }, [initialWorkerInstance, cache, preferCoordgen, rdkitPath, rdkitWorkerPublicFolder, removeHs, kekulize]);
 
   return <RDKitContext.Provider value={{ worker }}>{children}</RDKitContext.Provider>;
 };
