@@ -26,7 +26,7 @@ import { JSMol, RDKitModule } from '@rdkit/rdkit';
 import { cleanMolCache, clearCacheIfWillOverflow, getJSMolsFromCache, storeJSMolsInCache } from './caching';
 
 const createMol = (smiles: string, RDKit: RDKitModule) => {
-  const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs };
+  const molInstantiationDetails = { removeHs: globalThis.rdkitWorkerGlobals.removeHs, kekulize: globalThis.rdkitWorkerGlobals.kekulize };
   const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
   if (!mol) {
     console.error('@iktos-oss/rdkit-provider: failed to get mol for smiles = ', smiles);
