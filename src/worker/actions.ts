@@ -66,7 +66,13 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'INIT_RDKIT_MODULE';
       key: string;
-      payload: { rdkitPath?: string; cache?: RDKitProviderCacheOptions; preferCoordgen: boolean; removeHs: boolean; kekulize: boolean };
+      payload: {
+        rdkitPath?: string;
+        cache?: RDKitProviderCacheOptions;
+        preferCoordgen: boolean;
+        removeHs: boolean;
+        kekulize: boolean;
+      };
     }
   | {
       actionType: 'IS_CHIRAL';
