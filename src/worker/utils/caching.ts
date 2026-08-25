@@ -23,10 +23,19 @@
 */
 
 import { JSMol } from '@rdkit/rdkit';
+import { MolParsingOptions } from '../types';
 
 type MolType = 'mol' | 'qmol';
 
-const storeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType: MolType) => {
+const molCacheKey = (structure: string, parseOptions?: MolParsingOptions) =>
+  parseOptions ? `removeHs=${parseOptions.removeHs}-kekulize=${parseOptions.kekulize}-${structure}` : structure;
+
+const storeMolInCacheBasedOnMolType = (
+  structure: string,
+  jsMol: JSMol,
+  molType: MolType,
+  parseOptions?: MolParsingOptions,
+) => {
   if (
     !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
     !globalThis.rdkitWorkerGlobals.jsMolCache ||
@@ -34,7 +43,7 @@ const storeMolInCacheBasedOnMolType = (structure: string, jsMol: JSMol, molType:
   )
     return;
   if (molType === 'mol') {
-    globalThis.rdkitWorkerGlobals.jsMolCache[structure] = jsMol;
+    globalThis.rdkitWorkerGlobals.jsMolCache[molCacheKey(structure, parseOptions)] = jsMol;
   }
   if (molType === 'qmol') {
     globalThis.rdkitWorkerGlobals.jsQMolCache[structure] = jsMol;
@@ -45,6 +54,7 @@ interface MolsToCache {
   structure: string;
   jsMol: JSMol | null;
   molType: MolType;
+  parseOptions?: MolParsingOptions;
 }
 
 export const clearCacheIfWillOverflow = ({ nbMols, nbQmols }: { nbMols: number; nbQmols: number }) => {
@@ -75,10 +85,10 @@ export const storeJSMolsInCache = (molsToStore: MolsToCache[]) => {
     return;
   }
 
-  for (const { structure, jsMol, molType } of molsToStore) {
+  for (const { structure, jsMol, molType, parseOptions } of molsToStore) {
     if (!jsMol) continue;
     try {
-      storeMolInCacheBasedOnMolType(structure, jsMol, molType);
+      storeMolInCacheBasedOnMolType(structure, jsMol, molType, parseOptions);
     } catch (e) {
       console.error('@iktos-oss/rdkit-provider: failed while storing molecules in cahce', e);
       console.info('@iktos-oss/rdkit-provider: clearing cache');
@@ -91,7 +101,7 @@ export const storeJSMolsInCache = (molsToStore: MolsToCache[]) => {
   }
 };
 
-const getJSMolFromCache = (structure: string, molType: MolType) => {
+const getJSMolFromCache = (structure: string, molType: MolType, parseOptions?: MolParsingOptions) => {
   if (
     !globalThis.rdkitWorkerGlobals.jsMolCacheEnabled ||
     (!globalThis.rdkitWorkerGlobals.jsMolCache && !globalThis.rdkitWorkerGlobals.jsQMolCache)
@@ -103,7 +113,7 @@ const getJSMolFromCache = (structure: string, molType: MolType) => {
     if (!globalThis.rdkitWorkerGlobals.jsMolCache) {
       return null;
     }
-    return globalThis.rdkitWorkerGlobals.jsMolCache[structure];
+    return globalThis.rdkitWorkerGlobals.jsMolCache[molCacheKey(structure, parseOptions)];
   }
   if (molType === 'qmol') {
     if (!globalThis.rdkitWorkerGlobals.jsQMolCache) {
@@ -115,8 +125,8 @@ const getJSMolFromCache = (structure: string, molType: MolType) => {
   throw new Error(`@iktos-oss/rdkit-provider unkown molType=${molType} passed to getJSMolFromCache`);
 };
 
-export const getJSMolsFromCache = (structures: string[], molType: MolType) => {
-  return structures.map((struct) => getJSMolFromCache(struct, molType));
+export const getJSMolsFromCache = (structures: string[], molType: MolType, parseOptions?: MolParsingOptions) => {
+  return structures.map((struct) => getJSMolFromCache(struct, molType, parseOptions));
 };
 
 const cleanMolsCache = () => {

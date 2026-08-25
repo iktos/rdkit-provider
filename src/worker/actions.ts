@@ -87,7 +87,12 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_SVG';
       key: string;
-      payload: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails };
+      payload: {
+        smiles: string;
+        drawingDetails?: DrawingDetails;
+        alignmentDetails?: AlignmentDetails;
+        removeHs?: boolean;
+      };
     }
   | {
       actionType: 'GET_SVG_FROM_SMARTS';
@@ -107,7 +112,7 @@ export type WorkerMessageNarrower =
   | {
       actionType: 'GET_CANONICAL_FORM_FOR_STRUCTURE';
       key: string;
-      payload: { structure: string; molNotation?: MolNotation; useQMol?: boolean };
+      payload: { structure: string; molNotation?: MolNotation; useQMol?: boolean; removeHs?: boolean };
     }
   | {
       actionType: 'IS_VALID_SMILES';
@@ -141,6 +146,7 @@ export type WorkerMessageNarrower =
         targetNotation: MolNotation;
         sourceNotation?: SourceMolNotation;
         useQMol?: boolean;
+        removeHs?: boolean;
       };
     }
   | {

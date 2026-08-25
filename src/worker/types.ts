@@ -34,5 +34,12 @@ export interface RDKitWorkerGlobals {
   kekulize: boolean;
 }
 
+export interface MolParsingOverrides {
+  removeHs?: boolean;
+  kekulize?: boolean;
+}
+
+export type MolParsingOptions = Required<MolParsingOverrides>;
+
 export type CIPAtoms = [idx: number, cip: string][];
 export type CIPBonds = [beginAtomIdx: number, endAtomIdx: number, cip: string][];

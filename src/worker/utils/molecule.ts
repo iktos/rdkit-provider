@@ -24,13 +24,15 @@
 
 import { JSMol, RDKitModule } from '@rdkit/rdkit';
 import { cleanMolCache, clearCacheIfWillOverflow, getJSMolsFromCache, storeJSMolsInCache } from './caching';
+import { MolParsingOverrides, MolParsingOptions } from '../types';
 
-const createMol = (smiles: string, RDKit: RDKitModule) => {
-  const molInstantiationDetails = {
-    removeHs: globalThis.rdkitWorkerGlobals.removeHs,
-    kekulize: globalThis.rdkitWorkerGlobals.kekulize,
-  };
-  const mol = RDKit.get_mol(smiles, JSON.stringify(molInstantiationDetails));
+export const resolveMolParsingOptions = (overrides?: MolParsingOverrides): MolParsingOptions => ({
+  removeHs: overrides?.removeHs ?? globalThis.rdkitWorkerGlobals.removeHs,
+  kekulize: overrides?.kekulize ?? globalThis.rdkitWorkerGlobals.kekulize,
+});
+
+const createMol = (smiles: string, RDKit: RDKitModule, parseOptions: MolParsingOptions) => {
+  const mol = RDKit.get_mol(smiles, JSON.stringify(parseOptions));
   if (!mol) {
     console.error('@iktos-oss/rdkit-provider: failed to get mol for smiles = ', smiles);
     return null;
@@ -47,37 +49,39 @@ const createQMol = (smarts: string, RDKit: RDKitModule) => {
   return qmol;
 };
 
-const get_molecules_memory_unsafe = (listOfSmiles: string[], RDKit: RDKitModule) => {
+const get_molecules_memory_unsafe = (listOfSmiles: string[], RDKit: RDKitModule, parseOptions: MolParsingOptions) => {
   if (!RDKit) return [];
   clearCacheIfWillOverflow({ nbMols: listOfSmiles.length, nbQmols: 0 });
-  const cachedMolecules = getJSMolsFromCache(listOfSmiles, 'mol');
+  const cachedMolecules = getJSMolsFromCache(listOfSmiles, 'mol', parseOptions);
   const mols = cachedMolecules.map((cachedMol, idx) => {
     if (cachedMol) {
       return cachedMol;
     }
 
-    return createMol(listOfSmiles[idx], RDKit);
+    return createMol(listOfSmiles[idx], RDKit, parseOptions);
   });
   storeJSMolsInCache(
     mols.map((jsMol, idx) => ({
       structure: listOfSmiles[idx],
       jsMol,
       molType: 'mol',
+      parseOptions,
     })),
   );
 
   return mols;
 };
 
-export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule) => {
+export const get_molecules = (listOfSmiles: string[], RDKit: RDKitModule, overrides?: MolParsingOverrides) => {
+  const parseOptions = resolveMolParsingOptions(overrides);
   try {
-    return get_molecules_memory_unsafe(listOfSmiles, RDKit);
+    return get_molecules_memory_unsafe(listOfSmiles, RDKit, parseOptions);
   } catch (e) {
     // clean cache on possible Runtimeerror OOM
     console.error('@iktos-oss/rdkit-provider: caught error during get_molecules', e);
     console.info('@iktos-oss/rdkit-provider: clearing cache');
     cleanMolCache();
-    return get_molecules_memory_unsafe(listOfSmiles, RDKit);
+    return get_molecules_memory_unsafe(listOfSmiles, RDKit, parseOptions);
   }
 };
 

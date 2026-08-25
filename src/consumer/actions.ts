@@ -33,13 +33,19 @@ export const getSvg = (
     smiles,
     drawingDetails,
     alignmentDetails,
-  }: { smiles: string; drawingDetails?: DrawingDetails; alignmentDetails?: AlignmentDetails },
+    removeHs,
+  }: {
+    smiles: string;
+    drawingDetails?: DrawingDetails;
+    alignmentDetails?: AlignmentDetails;
+    removeHs?: boolean;
+  },
 ) => {
-  const key = `${smiles}-${JSON.stringify(drawingDetails)}-${JSON.stringify(alignmentDetails)}`;
+  const key = `${smiles}-${JSON.stringify(drawingDetails)}-${JSON.stringify(alignmentDetails)}-${removeHs}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_SVG,
     key: key,
-    payload: { smiles, drawingDetails, alignmentDetails },
+    payload: { smiles, drawingDetails, alignmentDetails, removeHs },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_SVG'>);
 };
 
@@ -85,13 +91,18 @@ export function getMoleculeDetails( // returnFullDetails = false is deprecated, 
 
 export const getCanonicalFormForStructure = (
   worker: Worker,
-  { structure, molNotation, useQMol }: { structure: string; molNotation?: MolNotation; useQMol?: boolean },
+  {
+    structure,
+    molNotation,
+    useQMol,
+    removeHs,
+  }: { structure: string; molNotation?: MolNotation; useQMol?: boolean; removeHs?: boolean },
 ) => {
-  const key = structure;
+  const key = `${structure}-qmol=${!!useQMol}-removeHs=${removeHs}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.GET_CANONICAL_FORM_FOR_STRUCTURE,
     key: key,
-    payload: { structure, molNotation, useQMol },
+    payload: { structure, molNotation, useQMol, removeHs },
   }).then((msg) => msg.payload as PayloadResponseType<'GET_CANONICAL_FORM_FOR_STRUCTURE'>);
 };
 
@@ -173,13 +184,20 @@ export const convertMolNotation = (
     targetNotation,
     sourceNotation,
     useQMol,
-  }: { moleculeString: string; targetNotation: MolNotation; sourceNotation?: SourceMolNotation; useQMol?: boolean },
+    removeHs,
+  }: {
+    moleculeString: string;
+    targetNotation: MolNotation;
+    sourceNotation?: SourceMolNotation;
+    useQMol?: boolean;
+    removeHs?: boolean;
+  },
 ) => {
-  const key = `${moleculeString}-to-${targetNotation}`;
+  const key = `${moleculeString}-to-${targetNotation}-qmol=${!!useQMol}-removeHs=${removeHs}`;
   return postWorkerJob(worker, {
     actionType: RDKIT_WORKER_ACTIONS.CONVERT_MOL_NOTATION,
     key,
-    payload: { moleculeString, targetNotation, sourceNotation, useQMol },
+    payload: { moleculeString, targetNotation, sourceNotation, useQMol, removeHs },
   }).then((msg) => msg.payload as PayloadResponseType<'CONVERT_MOL_NOTATION'>);
 };
 
