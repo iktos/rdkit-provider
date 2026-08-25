@@ -31,14 +31,16 @@ export const getSvg = ({
   smiles,
   drawingDetails,
   alignmentDetails,
+  removeHs,
 }: {
   smiles: string;
   drawingDetails?: DrawingDetails;
   alignmentDetails?: AlignmentDetails;
+  removeHs?: boolean;
 }) => {
   const molecules = alignmentDetails
-    ? get_molecules([smiles, alignmentDetails.molBlock], globalThis.workerRDKit)
-    : get_molecules([smiles], globalThis.workerRDKit);
+    ? get_molecules([smiles, alignmentDetails.molBlock], globalThis.workerRDKit, { removeHs })
+    : get_molecules([smiles], globalThis.workerRDKit, { removeHs });
 
   const [mol] = molecules;
   if (!mol) return null;
@@ -104,16 +106,19 @@ export function getMoleculeDetails({ smiles, returnFullDetails }: { smiles: stri
 export const getCanonicalFormForStructure = ({
   structure,
   useQMol = false,
+  removeHs,
 }: {
   structure: string;
   molNotation?: MolNotation;
   useQMol?: boolean;
+  removeHs?: boolean;
 }): string | null => {
   return convertMolNotation({
     moleculeString: structure,
     targetNotation: useQMol ? 'smarts' : 'smiles',
     useQMol,
     sourceNotation: undefined,
+    removeHs,
   });
 };
 
@@ -156,9 +161,9 @@ export const getMorganFp = ({
   }
 };
 
-export const isValidSmiles = (smiles: string): boolean => {
+export const isValidSmiles = (smiles: string, removeHs?: boolean): boolean => {
   if (!smiles) return false;
-  const [mol] = get_molecules([smiles], globalThis.workerRDKit);
+  const [mol] = get_molecules([smiles], globalThis.workerRDKit, { removeHs });
   if (!mol) return false;
   const isValid = mol.is_valid();
   release_molecules([mol]);
@@ -196,9 +201,9 @@ export const getMatchingSubstructure = ({ structure, substructure }: { structure
   return { matchingAtoms: atoms, matchingBonds: bonds };
 };
 
-export const isValidMolBlock = (mdl: string) => {
+export const isValidMolBlock = (mdl: string, removeHs?: boolean) => {
   if (!mdl.includes('M  END')) return false;
-  const [mol] = get_molecules([mdl], globalThis.workerRDKit);
+  const [mol] = get_molecules([mdl], globalThis.workerRDKit, { removeHs });
   if (!mol) return false;
   try {
     return mol.is_valid();
@@ -216,23 +221,25 @@ export const convertMolNotation = ({
   targetNotation,
   sourceNotation,
   useQMol,
+  removeHs,
 }: {
   moleculeString: string;
   targetNotation: MolNotation;
   sourceNotation?: SourceMolNotation;
   useQMol?: boolean;
+  removeHs?: boolean;
 }): string | null => {
   const shouldUseSmarts = !!useQMol || (useQMol === undefined && sourceNotation === 'smarts');
 
   if (sourceNotation != null) {
     if (sourceNotation === targetNotation)
       throw new Error('@iktos-oss/rdkit-provider: source and target notations must differ');
-    if (!_validateSource(moleculeString, sourceNotation))
+    if (!_validateSource(moleculeString, sourceNotation, removeHs))
       throw new Error('@iktos-oss/rdkit-provider: molecule string not valid');
   }
   const [mol] = shouldUseSmarts
     ? get_query_molecules([moleculeString], globalThis.workerRDKit)
-    : get_molecules([moleculeString], globalThis.workerRDKit);
+    : get_molecules([moleculeString], globalThis.workerRDKit, { removeHs });
   if (!mol) return null;
   try {
     return mol[`get_${targetNotation}`]();
@@ -300,12 +307,12 @@ export const getStereoTags = (structure: string) => {
   }
 };
 
-const _validateSource = (structure: string, sourceNotation: SourceMolNotation) => {
+const _validateSource = (structure: string, sourceNotation: SourceMolNotation, removeHs?: boolean) => {
   switch (sourceNotation) {
     case 'molblock':
-      return isValidMolBlock(structure);
+      return isValidMolBlock(structure, removeHs);
     case 'smiles':
-      return isValidSmiles(structure);
+      return isValidSmiles(structure, removeHs);
     case 'smarts':
       return isValidSmarts(structure);
     default:
